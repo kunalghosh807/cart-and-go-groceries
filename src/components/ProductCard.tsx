@@ -14,7 +14,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
 
   return (
     <Card className="overflow-hidden transition-all duration-200 product-card h-full flex flex-col">
-      <div className="relative pt-[100%]">
+      <div className="relative pt-[60%]">
         <img
           src={product.image}
           alt={product.name}
