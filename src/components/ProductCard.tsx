@@ -13,8 +13,8 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const { addToCart } = useCart();
 
   return (
-    <Card className="overflow-hidden transition-all duration-200 hover:shadow-md hover:-translate-y-1 h-full flex flex-col">
-      <div className="relative pt-[40%]">
+    <Card className="overflow-hidden transition-all duration-200 hover:shadow-md hover:-translate-y-1 h-full flex flex-col w-48 max-w-48">
+      <div className="relative pt-[30%]">
         <img
           src={product.image}
           alt={product.name}
