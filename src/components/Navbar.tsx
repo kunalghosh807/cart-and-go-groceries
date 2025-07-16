@@ -8,7 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { useCart } from '@/hooks/useCart';
 
 const Navbar = () => {
-  const { cartItems } = useCart();
+  const { cartItems, getItemsCount } = useCart();
   
   return (
     <nav className="sticky top-0 bg-white border-b border-gray-200 z-10">
@@ -48,9 +48,9 @@ const Navbar = () => {
             </Link>
             <Link to="/cart" className="relative">
               <ShoppingCart className="h-5 w-5 text-gray-600 hover:text-grocery-primary" />
-              {cartItems.length > 0 && (
+              {getItemsCount() > 0 && (
                 <Badge className="absolute -top-2 -right-2 bg-grocery-accent text-white text-xs min-w-[20px] h-5 flex items-center justify-center rounded-full">
-                  {cartItems.length}
+                  {getItemsCount()}
                 </Badge>
               )}
             </Link>
@@ -60,9 +60,9 @@ const Navbar = () => {
           <div className="md:hidden flex items-center">
             <Link to="/cart" className="relative mr-4">
               <ShoppingCart className="h-6 w-6 text-gray-600" />
-              {cartItems.length > 0 && (
+              {getItemsCount() > 0 && (
                 <Badge className="absolute -top-2 -right-2 bg-grocery-accent text-white text-xs min-w-[20px] h-5 flex items-center justify-center rounded-full">
-                  {cartItems.length}
+                  {getItemsCount()}
                 </Badge>
               )}
             </Link>
