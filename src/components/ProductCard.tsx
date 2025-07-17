@@ -17,8 +17,8 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const quantityInCart = cartItem ? cartItem.quantity : 0;
 
   return (
-    <Card className="overflow-hidden transition-all duration-200 hover:shadow-md hover:-translate-y-1 h-full flex flex-col w-24 max-w-24">
-      <div className="relative pt-[30%]">
+    <Card className="overflow-hidden transition-all duration-200 hover:shadow-md hover:-translate-y-1 h-full flex flex-col w-40 max-w-40">
+      <div className="relative pt-[50%]">
         <img
           src={product.image}
           alt={product.name}
