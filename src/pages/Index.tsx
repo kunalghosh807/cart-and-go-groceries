@@ -50,9 +50,11 @@ const Index = () => {
                 View All <ChevronRight className="h-4 w-4 ml-1" />
               </Button>
             </div>
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-              {featuredProducts.slice(0, 8).map((product) => (
-                <ProductCard key={product.id} product={product} />
+            <div className="flex gap-3 overflow-x-auto pb-4 scrollbar-hide">
+              {featuredProducts.map((product) => (
+                <div key={product.id} className="flex-none">
+                  <ProductCard product={product} />
+                </div>
               ))}
             </div>
           </section>
@@ -90,9 +92,11 @@ const Index = () => {
                 View All <ChevronRight className="h-4 w-4 ml-1" />
               </Button>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="flex gap-3 overflow-x-auto pb-4 scrollbar-hide">
               {dealProducts.map((product) => (
-                <ProductCard key={product.id} product={product} />
+                <div key={product.id} className="flex-none">
+                  <ProductCard product={product} />
+                </div>
               ))}
             </div>
           </section>

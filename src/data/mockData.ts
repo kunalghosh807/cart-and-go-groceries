@@ -102,6 +102,62 @@ export const featuredProducts = [
     image: "https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?q=80&w=500&auto=format&fit=crop",
     category: "Pantry Staples",
     quantity: 0
+  },
+  {
+    id: 9,
+    name: "Red Bell Peppers",
+    price: 3.99,
+    image: "https://images.unsplash.com/photo-1563565375-f3fdfdbefa83?q=80&w=500&auto=format&fit=crop",
+    category: "Fruits & Vegetables",
+    quantity: 0
+  },
+  {
+    id: 10,
+    name: "Chicken Breast",
+    price: 8.99,
+    image: "https://images.unsplash.com/photo-1604503468506-a8da13d82791?q=80&w=500&auto=format&fit=crop",
+    category: "Meat & Seafood",
+    quantity: 0
+  },
+  {
+    id: 11,
+    name: "Cheddar Cheese",
+    price: 5.49,
+    image: "https://images.unsplash.com/photo-1486297678162-eb2a19b0a32d?q=80&w=500&auto=format&fit=crop",
+    category: "Dairy & Eggs",
+    quantity: 0
+  },
+  {
+    id: 12,
+    name: "Blueberries",
+    price: 4.99,
+    image: "https://images.unsplash.com/photo-1498557850523-fd3d118b962e?q=80&w=500&auto=format&fit=crop",
+    category: "Fruits & Vegetables",
+    quantity: 0
+  },
+  {
+    id: 13,
+    name: "Honey",
+    price: 7.99,
+    image: "https://images.unsplash.com/photo-1587049332474-a06897c5c0e3?q=80&w=500&auto=format&fit=crop",
+    category: "Pantry Staples",
+    quantity: 0
+  },
+  {
+    id: 14,
+    name: "Croissants",
+    price: 6.99,
+    image: "https://images.unsplash.com/photo-1555507036-ab794f1a3468?q=80&w=500&auto=format&fit=crop",
+    category: "Bakery",
+    quantity: 0
+  },
+  {
+    id: 15,
+    name: "Ice Cream",
+    price: 4.49,
+    image: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?q=80&w=500&auto=format&fit=crop",
+    category: "Frozen Foods",
+    quantity: 0
   }
 ];
 
