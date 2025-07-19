@@ -103,11 +103,11 @@ const Profile = () => {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
                         <Label htmlFor="firstName">First Name</Label>
-                        <Input id="firstName" defaultValue="John" />
+                        <Input id="firstName" placeholder="Kunal" />
                       </div>
                       <div>
                         <Label htmlFor="lastName">Last Name</Label>
-                        <Input id="lastName" defaultValue="Doe" />
+                        <Input id="lastName" placeholder="Ghosh" />
                       </div>
                     </div>
                     <div>
@@ -116,7 +116,7 @@ const Profile = () => {
                     </div>
                     <div>
                       <Label htmlFor="phone">Phone Number</Label>
-                      <Input id="phone" type="tel" defaultValue="+1 (555) 123-4567" />
+                      <Input id="phone" type="tel" defaultValue="+91 " />
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
@@ -158,10 +158,29 @@ const Profile = () => {
                       {addresses.map((address, index) => (
                         <div key={index} className="flex items-center justify-between p-4 border rounded-lg">
                           <div>
-                            <p className="font-medium">Address {index + 1}</p>
+                            <p className="font-medium">Kunal Ghosh</p>
                             <p className="text-sm text-gray-600">{address}</p>
                           </div>
-                          <Button variant="outline" size="sm">
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => {
+                              const addressParts = address.split(', ');
+                              const streetInput = document.getElementById('street') as HTMLInputElement;
+                              const cityInput = document.getElementById('city') as HTMLInputElement;
+                              const stateInput = document.getElementById('state') as HTMLInputElement;
+                              const zipInput = document.getElementById('zip') as HTMLInputElement;
+                              
+                              if (streetInput && cityInput && stateInput && zipInput && addressParts.length >= 3) {
+                                streetInput.value = addressParts[0] || '';
+                                cityInput.value = addressParts[1] || '';
+                                const stateZip = addressParts[2]?.split(' ') || [];
+                                stateInput.value = stateZip[0] || '';
+                                zipInput.value = stateZip[1] || '';
+                                setActiveTab('personal');
+                              }
+                            }}
+                          >
                             Edit
                           </Button>
                         </div>
@@ -177,35 +196,10 @@ const Profile = () => {
                     <CardTitle>Recent Orders</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <div className="space-y-4">
-                      <div className="flex items-center justify-between p-4 border rounded-lg">
-                        <div>
-                          <p className="font-medium">Order #12345</p>
-                          <p className="text-sm text-gray-600">Placed on Dec 15, 2024</p>
-                          <p className="text-sm">5 items • $42.99</p>
-                        </div>
-                        <div className="text-right">
-                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                            Delivered
-                          </span>
-                        </div>
-                      </div>
-                      <div className="flex items-center justify-between p-4 border rounded-lg">
-                        <div>
-                          <p className="font-medium">Order #12344</p>
-                          <p className="text-sm text-gray-600">Placed on Dec 12, 2024</p>
-                          <p className="text-sm">3 items • $28.50</p>
-                        </div>
-                        <div className="text-right">
-                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                            In Transit
-                          </span>
-                        </div>
-                      </div>
+                    <div className="text-center py-8">
+                      <p className="text-gray-500">No orders found</p>
+                      <p className="text-sm text-gray-400 mt-2">Your order history will appear here once you make a purchase</p>
                     </div>
-                    <Button variant="outline" className="w-full mt-4">
-                      View All Orders
-                    </Button>
                   </CardContent>
                 </Card>
               )}
