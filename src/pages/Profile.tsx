@@ -12,20 +12,36 @@ const Profile = () => {
   const { toast } = useToast();
   const [addresses, setAddresses] = useState<string[]>([]);
   const [activeTab, setActiveTab] = useState('personal');
+  const [formData, setFormData] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+    phone: '',
+    street: '',
+    city: '',
+    state: '',
+    zip: ''
+  });
   
+  
+  const validateEmail = (email: string) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
+  const validatePhone = (phone: string) => {
+    const phoneRegex = /^\d{10}$/;
+    return phoneRegex.test(phone);
+  };
+
+  const handleInputChange = (field: string, value: string) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+  };
+
   const handleSaveChanges = () => {
-    const firstNameInput = document.getElementById('firstName') as HTMLInputElement;
-    const lastNameInput = document.getElementById('lastName') as HTMLInputElement;
-    const emailInput = document.getElementById('email') as HTMLInputElement;
-    const phoneInput = document.getElementById('phone') as HTMLInputElement;
-    const streetInput = document.getElementById('street') as HTMLInputElement;
-    const cityInput = document.getElementById('city') as HTMLInputElement;
-    const stateInput = document.getElementById('state') as HTMLInputElement;
-    const zipInput = document.getElementById('zip') as HTMLInputElement;
-    
     // Check if all fields are filled
-    const fields = [firstNameInput, lastNameInput, emailInput, phoneInput, streetInput, cityInput, stateInput, zipInput];
-    const emptyFields = fields.filter(field => !field?.value.trim());
+    const requiredFields = Object.entries(formData);
+    const emptyFields = requiredFields.filter(([key, value]) => !value.trim());
     
     if (emptyFields.length > 0) {
       toast({
@@ -35,21 +51,57 @@ const Profile = () => {
       });
       return;
     }
-    
-    if (streetInput && cityInput && stateInput && zipInput) {
-      const newAddress = `${streetInput.value}, ${cityInput.value}, ${stateInput.value} ${zipInput.value}`;
-      setAddresses(prev => [...prev, newAddress]);
-      
-      // Clear form
-      streetInput.value = '';
-      cityInput.value = '';
-      stateInput.value = '';
-      zipInput.value = '';
-      
+
+    // Validate email
+    if (!validateEmail(formData.email)) {
       toast({
-        title: "Address saved successfully!",
-        description: "Your new address has been added to your profile.",
+        title: "Invalid email format",
+        description: "Please enter a valid email address with domain name.",
+        variant: "destructive"
       });
+      return;
+    }
+
+    // Validate phone number
+    if (!validatePhone(formData.phone)) {
+      toast({
+        title: "Invalid phone number",
+        description: "Please enter a 10-digit phone number.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    const newAddress = `${formData.street}, ${formData.city}, ${formData.state} ${formData.zip}`;
+    setAddresses(prev => [...prev, newAddress]);
+    
+    // Clear address form fields only
+    setFormData(prev => ({
+      ...prev,
+      street: '',
+      city: '',
+      state: '',
+      zip: ''
+    }));
+    
+    toast({
+      title: "Address saved successfully!",
+      description: "Your new address has been added to your profile.",
+    });
+  };
+
+  const handleEditAddress = (address: string) => {
+    const addressParts = address.split(', ');
+    if (addressParts.length >= 3) {
+      const stateZip = addressParts[2]?.split(' ') || [];
+      setFormData(prev => ({
+        ...prev,
+        street: addressParts[0] || '',
+        city: addressParts[1] || '',
+        state: stateZip[0] || '',
+        zip: stateZip[1] || ''
+      }));
+      setActiveTab('personal');
     }
   };
 
@@ -117,42 +169,99 @@ const Profile = () => {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
                         <Label htmlFor="firstName">First Name</Label>
-                        <Input id="firstName" placeholder="Kunal" required />
+                        <Input 
+                          id="firstName" 
+                          placeholder="Kunal" 
+                          value={formData.firstName}
+                          onChange={(e) => handleInputChange('firstName', e.target.value)}
+                          required 
+                        />
                       </div>
                       <div>
                         <Label htmlFor="lastName">Last Name</Label>
-                        <Input id="lastName" placeholder="Ghosh" required />
+                        <Input 
+                          id="lastName" 
+                          placeholder="Ghosh" 
+                          value={formData.lastName}
+                          onChange={(e) => handleInputChange('lastName', e.target.value)}
+                          required 
+                        />
                       </div>
                     </div>
                     <div>
                       <Label htmlFor="email">Email</Label>
-                      <Input id="email" type="email" placeholder="kunal.ghosh@example.com" required />
+                      <Input 
+                        id="email" 
+                        type="email" 
+                        placeholder="kunal.ghosh@example.com" 
+                        value={formData.email}
+                        onChange={(e) => handleInputChange('email', e.target.value)}
+                        required 
+                      />
                     </div>
                     <div>
                       <Label htmlFor="phone">Phone Number</Label>
                       <div className="relative">
                         <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground pointer-events-none">+91</span>
-                        <Input id="phone" type="tel" className="pl-12" placeholder="9876543210" required />
+                        <Input 
+                          id="phone" 
+                          type="tel" 
+                          className="pl-12" 
+                          placeholder="9876543210" 
+                          value={formData.phone}
+                          onChange={(e) => {
+                            const value = e.target.value.replace(/\D/g, ''); // Only allow digits
+                            if (value.length <= 10) {
+                              handleInputChange('phone', value);
+                            }
+                          }}
+                          maxLength={10}
+                          required 
+                        />
                       </div>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
                         <Label htmlFor="street">Street Address</Label>
-                        <Input id="street" placeholder="123 Main St" required />
+                        <Input 
+                          id="street" 
+                          placeholder="123 Main St" 
+                          value={formData.street}
+                          onChange={(e) => handleInputChange('street', e.target.value)}
+                          required 
+                        />
                       </div>
                       <div>
                         <Label htmlFor="city">City</Label>
-                        <Input id="city" placeholder="Anytown" required />
+                        <Input 
+                          id="city" 
+                          placeholder="Anytown" 
+                          value={formData.city}
+                          onChange={(e) => handleInputChange('city', e.target.value)}
+                          required 
+                        />
                       </div>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
                         <Label htmlFor="state">State</Label>
-                        <Input id="state" placeholder="CA" required />
+                        <Input 
+                          id="state" 
+                          placeholder="CA" 
+                          value={formData.state}
+                          onChange={(e) => handleInputChange('state', e.target.value)}
+                          required 
+                        />
                       </div>
                       <div>
                         <Label htmlFor="zip">ZIP Code</Label>
-                        <Input id="zip" placeholder="12345" required />
+                        <Input 
+                          id="zip" 
+                          placeholder="12345" 
+                          value={formData.zip}
+                          onChange={(e) => handleInputChange('zip', e.target.value)}
+                          required 
+                        />
                       </div>
                     </div>
                     <Button 
@@ -187,22 +296,7 @@ const Profile = () => {
                             <Button 
                               variant="outline" 
                               size="sm"
-                              onClick={() => {
-                                const addressParts = address.split(', ');
-                                const streetInput = document.getElementById('street') as HTMLInputElement;
-                                const cityInput = document.getElementById('city') as HTMLInputElement;
-                                const stateInput = document.getElementById('state') as HTMLInputElement;
-                                const zipInput = document.getElementById('zip') as HTMLInputElement;
-                                
-                                if (streetInput && cityInput && stateInput && zipInput && addressParts.length >= 3) {
-                                  streetInput.value = addressParts[0] || '';
-                                  cityInput.value = addressParts[1] || '';
-                                  const stateZip = addressParts[2]?.split(' ') || [];
-                                  stateInput.value = stateZip[0] || '';
-                                  zipInput.value = stateZip[1] || '';
-                                  setActiveTab('personal');
-                                }
-                              }}
+                              onClick={() => handleEditAddress(address)}
                             >
                               Edit
                             </Button>
