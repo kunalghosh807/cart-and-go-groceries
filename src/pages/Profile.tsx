@@ -10,17 +10,31 @@ import { useToast } from '@/hooks/use-toast';
 
 const Profile = () => {
   const { toast } = useToast();
-  const [addresses, setAddresses] = useState<string[]>([
-    "123 Main St, Anytown, USA 12345",
-    "456 Oak Ave, Another City, USA 67890"
-  ]);
+  const [addresses, setAddresses] = useState<string[]>([]);
   const [activeTab, setActiveTab] = useState('personal');
   
   const handleSaveChanges = () => {
+    const firstNameInput = document.getElementById('firstName') as HTMLInputElement;
+    const lastNameInput = document.getElementById('lastName') as HTMLInputElement;
+    const emailInput = document.getElementById('email') as HTMLInputElement;
+    const phoneInput = document.getElementById('phone') as HTMLInputElement;
     const streetInput = document.getElementById('street') as HTMLInputElement;
     const cityInput = document.getElementById('city') as HTMLInputElement;
     const stateInput = document.getElementById('state') as HTMLInputElement;
     const zipInput = document.getElementById('zip') as HTMLInputElement;
+    
+    // Check if all fields are filled
+    const fields = [firstNameInput, lastNameInput, emailInput, phoneInput, streetInput, cityInput, stateInput, zipInput];
+    const emptyFields = fields.filter(field => !field?.value.trim());
+    
+    if (emptyFields.length > 0) {
+      toast({
+        title: "Please fill all fields",
+        description: "All input fields are required.",
+        variant: "destructive"
+      });
+      return;
+    }
     
     if (streetInput && cityInput && stateInput && zipInput) {
       const newAddress = `${streetInput.value}, ${cityInput.value}, ${stateInput.value} ${zipInput.value}`;
@@ -103,39 +117,42 @@ const Profile = () => {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
                         <Label htmlFor="firstName">First Name</Label>
-                        <Input id="firstName" placeholder="Kunal" />
+                        <Input id="firstName" placeholder="Kunal" required />
                       </div>
                       <div>
                         <Label htmlFor="lastName">Last Name</Label>
-                        <Input id="lastName" placeholder="Ghosh" />
+                        <Input id="lastName" placeholder="Ghosh" required />
                       </div>
                     </div>
                     <div>
                       <Label htmlFor="email">Email</Label>
-                      <Input id="email" type="email" defaultValue="john.doe@example.com" />
+                      <Input id="email" type="email" placeholder="kunal.ghosh@example.com" required />
                     </div>
                     <div>
                       <Label htmlFor="phone">Phone Number</Label>
-                      <Input id="phone" type="tel" defaultValue="+91 " />
+                      <div className="relative">
+                        <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground pointer-events-none">+91</span>
+                        <Input id="phone" type="tel" className="pl-12" placeholder="9876543210" required />
+                      </div>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
                         <Label htmlFor="street">Street Address</Label>
-                        <Input id="street" placeholder="123 Main St" />
+                        <Input id="street" placeholder="123 Main St" required />
                       </div>
                       <div>
                         <Label htmlFor="city">City</Label>
-                        <Input id="city" placeholder="Anytown" />
+                        <Input id="city" placeholder="Anytown" required />
                       </div>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
                         <Label htmlFor="state">State</Label>
-                        <Input id="state" placeholder="CA" />
+                        <Input id="state" placeholder="CA" required />
                       </div>
                       <div>
                         <Label htmlFor="zip">ZIP Code</Label>
-                        <Input id="zip" placeholder="12345" />
+                        <Input id="zip" placeholder="12345" required />
                       </div>
                     </div>
                     <Button 
@@ -155,36 +172,43 @@ const Profile = () => {
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-4">
-                      {addresses.map((address, index) => (
-                        <div key={index} className="flex items-center justify-between p-4 border rounded-lg">
-                          <div>
-                            <p className="font-medium">Kunal Ghosh</p>
-                            <p className="text-sm text-gray-600">{address}</p>
-                          </div>
-                          <Button 
-                            variant="outline" 
-                            size="sm"
-                            onClick={() => {
-                              const addressParts = address.split(', ');
-                              const streetInput = document.getElementById('street') as HTMLInputElement;
-                              const cityInput = document.getElementById('city') as HTMLInputElement;
-                              const stateInput = document.getElementById('state') as HTMLInputElement;
-                              const zipInput = document.getElementById('zip') as HTMLInputElement;
-                              
-                              if (streetInput && cityInput && stateInput && zipInput && addressParts.length >= 3) {
-                                streetInput.value = addressParts[0] || '';
-                                cityInput.value = addressParts[1] || '';
-                                const stateZip = addressParts[2]?.split(' ') || [];
-                                stateInput.value = stateZip[0] || '';
-                                zipInput.value = stateZip[1] || '';
-                                setActiveTab('personal');
-                              }
-                            }}
-                          >
-                            Edit
-                          </Button>
+                      {addresses.length === 0 ? (
+                        <div className="text-center py-8">
+                          <p className="text-gray-500">No saved addresses</p>
+                          <p className="text-sm text-gray-400 mt-2">Add an address in Personal Info to see it here</p>
                         </div>
-                      ))}
+                      ) : (
+                        addresses.map((address, index) => (
+                          <div key={index} className="flex items-center justify-between p-4 border rounded-lg">
+                            <div>
+                              <p className="font-medium">Kunal Ghosh</p>
+                              <p className="text-sm text-gray-600">{address}</p>
+                            </div>
+                            <Button 
+                              variant="outline" 
+                              size="sm"
+                              onClick={() => {
+                                const addressParts = address.split(', ');
+                                const streetInput = document.getElementById('street') as HTMLInputElement;
+                                const cityInput = document.getElementById('city') as HTMLInputElement;
+                                const stateInput = document.getElementById('state') as HTMLInputElement;
+                                const zipInput = document.getElementById('zip') as HTMLInputElement;
+                                
+                                if (streetInput && cityInput && stateInput && zipInput && addressParts.length >= 3) {
+                                  streetInput.value = addressParts[0] || '';
+                                  cityInput.value = addressParts[1] || '';
+                                  const stateZip = addressParts[2]?.split(' ') || [];
+                                  stateInput.value = stateZip[0] || '';
+                                  zipInput.value = stateZip[1] || '';
+                                  setActiveTab('personal');
+                                }
+                              }}
+                            >
+                              Edit
+                            </Button>
+                          </div>
+                        ))
+                      )}
                     </div>
                   </CardContent>
                 </Card>
