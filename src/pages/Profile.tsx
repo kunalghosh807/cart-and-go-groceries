@@ -11,7 +11,7 @@ import { useToast } from '@/hooks/use-toast';
 
 const Profile = () => {
   const { toast } = useToast();
-  const [addresses, setAddresses] = useState<string[]>([]);
+  const [addresses, setAddresses] = useState<{name: string, address: string}[]>([]);
   const [activeTab, setActiveTab] = useState('personal');
   const [formData, setFormData] = useState({
     firstName: '',
@@ -73,7 +73,10 @@ const Profile = () => {
       return;
     }
 
-    const newAddress = `${formData.street}, ${formData.city}, ${formData.state} ${formData.zip}`;
+    const newAddress = {
+      name: `${formData.firstName} ${formData.lastName}`,
+      address: `${formData.street}, ${formData.city}, ${formData.state} ${formData.zip}`
+    };
     setAddresses(prev => [...prev, newAddress]);
     
     // Clear address form fields only
@@ -91,12 +94,15 @@ const Profile = () => {
     });
   };
 
-  const handleEditAddress = (address: string) => {
-    const addressParts = address.split(', ');
+  const handleEditAddress = (addressObj: {name: string, address: string}) => {
+    const addressParts = addressObj.address.split(', ');
+    const nameParts = addressObj.name.split(' ');
     if (addressParts.length >= 3) {
       const stateZip = addressParts[2]?.split(' ') || [];
       setFormData(prev => ({
         ...prev,
+        firstName: nameParts[0] || '',
+        lastName: nameParts.slice(1).join(' ') || '',
         street: addressParts[0] || '',
         city: addressParts[1] || '',
         state: stateZip[0] || '',
@@ -106,8 +112,8 @@ const Profile = () => {
     }
   };
 
-  const handleDeleteAddress = (addressToDelete: string) => {
-    setAddresses(prev => prev.filter(address => address !== addressToDelete));
+  const handleDeleteAddress = (addressToDelete: {name: string, address: string}) => {
+    setAddresses(prev => prev.filter(addr => addr.name !== addressToDelete.name || addr.address !== addressToDelete.address));
     toast({
       title: "Address deleted",
       description: "The address has been removed from your profile.",
@@ -296,11 +302,11 @@ const Profile = () => {
                           <p className="text-sm text-gray-400 mt-2">Add an address in Personal Info to see it here</p>
                         </div>
                       ) : (
-                        addresses.map((address, index) => (
+                        addresses.map((addressObj, index) => (
                           <div key={index} className="flex items-center justify-between p-4 border rounded-lg">
                             <div>
-                              <p className="font-medium">Kunal Ghosh</p>
-                              <p className="text-sm text-gray-600">{address}</p>
+                              <p className="font-medium">{addressObj.name}</p>
+                              <p className="text-sm text-gray-600">{addressObj.address}</p>
                             </div>
                             <DropdownMenu>
                               <DropdownMenuTrigger asChild>
@@ -309,11 +315,11 @@ const Profile = () => {
                                 </Button>
                               </DropdownMenuTrigger>
                               <DropdownMenuContent align="end">
-                                <DropdownMenuItem onClick={() => handleEditAddress(address)}>
+                                <DropdownMenuItem onClick={() => handleEditAddress(addressObj)}>
                                   Edit
                                 </DropdownMenuItem>
                                 <DropdownMenuItem 
-                                  onClick={() => handleDeleteAddress(address)}
+                                  onClick={() => handleDeleteAddress(addressObj)}
                                   className="text-red-600 focus:text-red-600"
                                 >
                                   Delete
