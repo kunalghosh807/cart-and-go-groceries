@@ -41,6 +41,7 @@ const Profile = () => {
   };
 
   const handleSaveChanges = () => {
+    console.log('handleSaveChanges called, editingIndex:', editingIndex);
     // Check if all fields are filled
     const requiredFields = Object.entries(formData);
     const emptyFields = requiredFields.filter(([key, value]) => !value.trim());
@@ -80,6 +81,7 @@ const Profile = () => {
     };
 
     if (editingIndex !== null) {
+      console.log('Updating address at index:', editingIndex);
       // Update existing address
       setAddresses(prev => prev.map((addr, index) => 
         index === editingIndex ? addressData : addr
@@ -90,6 +92,7 @@ const Profile = () => {
         description: "Your address has been updated.",
       });
     } else {
+      console.log('Adding new address');
       // Add new address
       setAddresses(prev => [...prev, addressData]);
       toast({
@@ -109,6 +112,7 @@ const Profile = () => {
   };
 
   const handleEditAddress = (addressObj: {name: string, address: string}, index: number) => {
+    console.log('handleEditAddress called with index:', index);
     const addressParts = addressObj.address.split(', ');
     const nameParts = addressObj.name.split(' ');
     if (addressParts.length >= 3) {
