@@ -5,7 +5,8 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { User, Package, MapPin, CreditCard } from 'lucide-react';
+import { User, Package, MapPin, CreditCard, MoreVertical } from 'lucide-react';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { useToast } from '@/hooks/use-toast';
 
 const Profile = () => {
@@ -103,6 +104,14 @@ const Profile = () => {
       }));
       setActiveTab('personal');
     }
+  };
+
+  const handleDeleteAddress = (addressToDelete: string) => {
+    setAddresses(prev => prev.filter(address => address !== addressToDelete));
+    toast({
+      title: "Address deleted",
+      description: "The address has been removed from your profile.",
+    });
   };
 
   return (
@@ -293,13 +302,24 @@ const Profile = () => {
                               <p className="font-medium">Kunal Ghosh</p>
                               <p className="text-sm text-gray-600">{address}</p>
                             </div>
-                            <Button 
-                              variant="outline" 
-                              size="sm"
-                              onClick={() => handleEditAddress(address)}
-                            >
-                              Edit
-                            </Button>
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                                  <MoreVertical className="h-4 w-4" />
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end">
+                                <DropdownMenuItem onClick={() => handleEditAddress(address)}>
+                                  Edit
+                                </DropdownMenuItem>
+                                <DropdownMenuItem 
+                                  onClick={() => handleDeleteAddress(address)}
+                                  className="text-red-600 focus:text-red-600"
+                                >
+                                  Delete
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
                           </div>
                         ))
                       )}
