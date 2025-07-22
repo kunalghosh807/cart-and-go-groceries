@@ -379,12 +379,47 @@ const Profile = () => {
                           <p className="font-medium">Visa ending in 4242</p>
                           <p className="text-sm text-gray-600">Expires 12/26</p>
                         </div>
-                        <Button variant="outline" size="sm">
-                          Edit
-                        </Button>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                              <MoreVertical className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem onClick={() => {
+                              toast({
+                                title: "Edit Payment Method",
+                                description: "Payment method editing requires Supabase integration for secure payment processing.",
+                              });
+                            }}>
+                              Edit
+                            </DropdownMenuItem>
+                            <DropdownMenuItem 
+                              onClick={() => {
+                                toast({
+                                  title: "Delete Payment Method",
+                                  description: "Payment method deletion requires Supabase integration for secure payment processing.",
+                                });
+                              }}
+                              className="text-red-600 focus:text-red-600"
+                            >
+                              Delete
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
                       </div>
                     </div>
-                    <Button variant="outline" className="w-full mt-4">
+                    <Button 
+                      variant="outline" 
+                      className="w-full mt-4"
+                      onClick={() => {
+                        toast({
+                          title: "Add Payment Method",
+                          description: "To add payment methods securely, please connect your project to Supabase for backend integration with Stripe.",
+                          variant: "default"
+                        });
+                      }}
+                    >
                       Add Payment Method
                     </Button>
                   </CardContent>
