@@ -13,6 +13,7 @@ const Profile = () => {
   const { toast } = useToast();
   const [addresses, setAddresses] = useState<{name: string, address: string}[]>([]);
   const [activeTab, setActiveTab] = useState('personal');
+  const [editingIndex, setEditingIndex] = useState<number | null>(null);
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -73,11 +74,29 @@ const Profile = () => {
       return;
     }
 
-    const newAddress = {
+    const addressData = {
       name: `${formData.firstName} ${formData.lastName}`,
       address: `${formData.street}, ${formData.city}, ${formData.state} ${formData.zip}`
     };
-    setAddresses(prev => [...prev, newAddress]);
+
+    if (editingIndex !== null) {
+      // Update existing address
+      setAddresses(prev => prev.map((addr, index) => 
+        index === editingIndex ? addressData : addr
+      ));
+      setEditingIndex(null);
+      toast({
+        title: "Address updated successfully!",
+        description: "Your address has been updated.",
+      });
+    } else {
+      // Add new address
+      setAddresses(prev => [...prev, addressData]);
+      toast({
+        title: "Address saved successfully!",
+        description: "Your new address has been added to your profile.",
+      });
+    }
     
     // Clear address form fields only
     setFormData(prev => ({
@@ -87,14 +106,9 @@ const Profile = () => {
       state: '',
       zip: ''
     }));
-    
-    toast({
-      title: "Address saved successfully!",
-      description: "Your new address has been added to your profile.",
-    });
   };
 
-  const handleEditAddress = (addressObj: {name: string, address: string}) => {
+  const handleEditAddress = (addressObj: {name: string, address: string}, index: number) => {
     const addressParts = addressObj.address.split(', ');
     const nameParts = addressObj.name.split(' ');
     if (addressParts.length >= 3) {
@@ -108,6 +122,7 @@ const Profile = () => {
         state: stateZip[0] || '',
         zip: stateZip[1] || ''
       }));
+      setEditingIndex(index);
       setActiveTab('personal');
     }
   };
@@ -283,7 +298,7 @@ const Profile = () => {
                       className="bg-grocery-primary hover:bg-grocery-dark text-white"
                       onClick={handleSaveChanges}
                     >
-                      Save Changes
+                      {editingIndex !== null ? 'Update Address' : 'Save Changes'}
                     </Button>
                   </CardContent>
                 </Card>
@@ -315,7 +330,7 @@ const Profile = () => {
                                 </Button>
                               </DropdownMenuTrigger>
                               <DropdownMenuContent align="end">
-                                <DropdownMenuItem onClick={() => handleEditAddress(addressObj)}>
+                                <DropdownMenuItem onClick={() => handleEditAddress(addressObj, index)}>
                                   Edit
                                 </DropdownMenuItem>
                                 <DropdownMenuItem 
