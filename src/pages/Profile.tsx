@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { Button } from '@/components/ui/button';
@@ -8,12 +8,15 @@ import { Label } from '@/components/ui/label';
 import { User, Package, MapPin, CreditCard, MoreVertical } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 
 const Profile = () => {
   const { toast } = useToast();
   const [addresses, setAddresses] = useState<{name: string, address: string}[]>([]);
   const [activeTab, setActiveTab] = useState('personal');
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
+  const [paymentMethods, setPaymentMethods] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -138,6 +141,94 @@ const Profile = () => {
       description: "The address has been removed from your profile.",
     });
   };
+
+  // Load payment methods
+  const loadPaymentMethods = async () => {
+    try {
+      setLoading(true);
+      const { data, error } = await supabase.functions.invoke('get-payment-methods');
+      
+      if (error) throw error;
+      
+      setPaymentMethods(data.payment_methods || []);
+    } catch (error) {
+      console.error('Error loading payment methods:', error);
+      toast({
+        title: "Error loading payment methods",
+        description: "Please try again later.",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Add payment method
+  const handleAddPaymentMethod = async () => {
+    try {
+      setLoading(true);
+      const { data, error } = await supabase.functions.invoke('create-payment-setup');
+      
+      if (error) throw error;
+      
+      // Open Stripe Elements in a new window (simplified for demo)
+      // In a real app, you'd integrate Stripe Elements properly
+      toast({
+        title: "Payment Method Setup",
+        description: "Opening payment method setup. In production, this would integrate with Stripe Elements.",
+      });
+      
+      // Refresh payment methods after setup
+      setTimeout(() => {
+        loadPaymentMethods();
+      }, 2000);
+    } catch (error) {
+      console.error('Error setting up payment method:', error);
+      toast({
+        title: "Error setting up payment method",
+        description: "Please try again later.",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Delete payment method
+  const handleDeletePaymentMethod = async (paymentMethodId: string) => {
+    try {
+      setLoading(true);
+      const { data, error } = await supabase.functions.invoke('delete-payment-method', {
+        body: { payment_method_id: paymentMethodId }
+      });
+      
+      if (error) throw error;
+      
+      toast({
+        title: "Payment method deleted",
+        description: "The payment method has been removed.",
+      });
+      
+      // Refresh payment methods
+      loadPaymentMethods();
+    } catch (error) {
+      console.error('Error deleting payment method:', error);
+      toast({
+        title: "Error deleting payment method",
+        description: "Please try again later.",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Load payment methods when payments tab is active
+  useEffect(() => {
+    if (activeTab === 'payments') {
+      loadPaymentMethods();
+    }
+  }, [activeTab]);
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -374,53 +465,53 @@ const Profile = () => {
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-4">
-                      <div className="flex items-center justify-between p-4 border rounded-lg">
-                        <div>
-                          <p className="font-medium">Visa ending in 4242</p>
-                          <p className="text-sm text-gray-600">Expires 12/26</p>
+                      {loading ? (
+                        <div className="text-center py-8">
+                          <p className="text-gray-500">Loading payment methods...</p>
                         </div>
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                              <MoreVertical className="h-4 w-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem onClick={() => {
-                              toast({
-                                title: "Edit Payment Method",
-                                description: "Payment method editing requires Supabase integration for secure payment processing.",
-                              });
-                            }}>
-                              Edit
-                            </DropdownMenuItem>
-                            <DropdownMenuItem 
-                              onClick={() => {
-                                toast({
-                                  title: "Delete Payment Method",
-                                  description: "Payment method deletion requires Supabase integration for secure payment processing.",
-                                });
-                              }}
-                              className="text-red-600 focus:text-red-600"
-                            >
-                              Delete
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </div>
+                      ) : paymentMethods.length === 0 ? (
+                        <div className="text-center py-8">
+                          <p className="text-gray-500">No payment methods found</p>
+                          <p className="text-sm text-gray-400 mt-2">Add a payment method to get started</p>
+                        </div>
+                      ) : (
+                        paymentMethods.map((pm) => (
+                          <div key={pm.id} className="flex items-center justify-between p-4 border rounded-lg">
+                            <div>
+                              <p className="font-medium">
+                                {pm.brand?.charAt(0).toUpperCase() + pm.brand?.slice(1)} ending in {pm.last4}
+                              </p>
+                              <p className="text-sm text-gray-600">
+                                Expires {pm.exp_month}/{pm.exp_year}
+                              </p>
+                            </div>
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                                  <MoreVertical className="h-4 w-4" />
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end">
+                                <DropdownMenuItem 
+                                  onClick={() => handleDeletePaymentMethod(pm.id)}
+                                  className="text-red-600 focus:text-red-600"
+                                  disabled={loading}
+                                >
+                                  Delete
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          </div>
+                        ))
+                      )}
                     </div>
                     <Button 
                       variant="outline" 
                       className="w-full mt-4"
-                      onClick={() => {
-                        toast({
-                          title: "Add Payment Method",
-                          description: "To add payment methods securely, please connect your project to Supabase for backend integration with Stripe.",
-                          variant: "default"
-                        });
-                      }}
+                      onClick={handleAddPaymentMethod}
+                      disabled={loading}
                     >
-                      Add Payment Method
+                      {loading ? "Processing..." : "Add Payment Method"}
                     </Button>
                   </CardContent>
                 </Card>
