@@ -11,6 +11,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { AddPaymentMethodModal } from '@/components/AddPaymentMethodModal';
 
 const Profile = () => {
   const { toast } = useToast();
@@ -20,6 +21,7 @@ const Profile = () => {
   const [activeTab, setActiveTab] = useState('personal');
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
   const [paymentMethods, setPaymentMethods] = useState<any[]>([]);
+  const [showAddPaymentModal, setShowAddPaymentModal] = useState(false);
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     firstName: '',
@@ -51,7 +53,6 @@ const Profile = () => {
       </div>
     );
   }
-  
   
   const validateEmail = (email: string) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -189,40 +190,14 @@ const Profile = () => {
 
   // Add payment method
   const handleAddPaymentMethod = async () => {
-    try {
-      setLoading(true);
-      const { data, error } = await supabase.functions.invoke('create-payment-setup');
-      
-      if (error) throw error;
-      
-      // Open Stripe Elements in a new window (simplified for demo)
-      // In a real app, you'd integrate Stripe Elements properly
-      toast({
-        title: "Payment Method Setup",
-        description: "Opening payment method setup. In production, this would integrate with Stripe Elements.",
-      });
-      
-      // Refresh payment methods after setup
-      setTimeout(() => {
-        loadPaymentMethods();
-      }, 2000);
-    } catch (error) {
-      console.error('Error setting up payment method:', error);
-      toast({
-        title: "Error setting up payment method",
-        description: "Please try again later.",
-        variant: "destructive"
-      });
-    } finally {
-      setLoading(false);
-    }
+    setShowAddPaymentModal(true);
   };
 
   // Delete payment method
   const handleDeletePaymentMethod = async (paymentMethodId: string) => {
     try {
       setLoading(true);
-      const { data, error } = await supabase.functions.invoke('delete-payment-method', {
+      const { error } = await supabase.functions.invoke('delete-payment-method', {
         body: { payment_method_id: paymentMethodId }
       });
       
@@ -545,6 +520,15 @@ const Profile = () => {
         </div>
       </main>
       <Footer />
+      
+      <AddPaymentMethodModal 
+        isOpen={showAddPaymentModal}
+        onClose={() => setShowAddPaymentModal(false)}
+        onSuccess={() => {
+          loadPaymentMethods();
+          setShowAddPaymentModal(false);
+        }}
+      />
     </div>
   );
 };
