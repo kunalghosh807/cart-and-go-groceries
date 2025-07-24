@@ -35,7 +35,7 @@ serve(async (req) => {
       throw new Error("User not authenticated");
     }
 
-    const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") || "", {
+    const stripe = new Stripe(Deno.env.get("Stripe Secret API key") || "", {
       apiVersion: "2023-10-16",
     });
 
