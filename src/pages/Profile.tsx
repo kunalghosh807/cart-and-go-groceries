@@ -17,7 +17,7 @@ const Profile = () => {
   const { toast } = useToast();
   const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
-  const [addresses, setAddresses] = useState<{name: string, address: string}[]>([]);
+  const [addresses, setAddresses] = useState<{id: string, name: string, street: string, city: string, state: string, zip: string}[]>([]);
   const [activeTab, setActiveTab] = useState('personal');
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
   const [paymentMethods, setPaymentMethods] = useState<any[]>([]);
@@ -40,6 +40,37 @@ const Profile = () => {
       navigate('/auth');
     }
   }, [user, authLoading, navigate]);
+
+  // Load addresses from database
+  const loadAddresses = async () => {
+    if (!user) return;
+    
+    try {
+      const { data, error } = await supabase
+        .from('addresses')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false });
+      
+      if (error) throw error;
+      
+      setAddresses(data || []);
+    } catch (error) {
+      console.error('Error loading addresses:', error);
+      toast({
+        title: "Error loading addresses",
+        description: "Please try again later.",
+        variant: "destructive"
+      });
+    }
+  };
+
+  // Load addresses when user is available
+  useEffect(() => {
+    if (user) {
+      loadAddresses();
+    }
+  }, [user]);
 
   // If still loading auth or no user, show loading
   if (authLoading || !user) {
@@ -68,7 +99,7 @@ const Profile = () => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
-  const handleSaveChanges = () => {
+  const handleSaveChanges = async () => {
     console.log('handleSaveChanges called, editingIndex:', editingIndex);
     // Check if all fields are filled
     const requiredFields = Object.entries(formData);
@@ -103,68 +134,120 @@ const Profile = () => {
       return;
     }
 
-    const addressData = {
-      name: `${formData.firstName} ${formData.lastName}`,
-      address: `${formData.street}, ${formData.city}, ${formData.state} ${formData.zip}`
-    };
-
-    if (editingIndex !== null) {
-      console.log('Updating address at index:', editingIndex);
-      // Update existing address
-      setAddresses(prev => prev.map((addr, index) => 
-        index === editingIndex ? addressData : addr
-      ));
-      setEditingIndex(null);
-      toast({
-        title: "Address updated successfully!",
-        description: "Your address has been updated.",
-      });
-    } else {
-      console.log('Adding new address');
-      // Add new address
-      setAddresses(prev => [...prev, addressData]);
-      toast({
-        title: "Address saved successfully!",
-        description: "Your new address has been added to your profile.",
-      });
-    }
-    
-    // Clear address form fields only
-    setFormData(prev => ({
-      ...prev,
-      street: '',
-      city: '',
-      state: '',
-      zip: ''
-    }));
-  };
-
-  const handleEditAddress = (addressObj: {name: string, address: string}, index: number) => {
-    console.log('handleEditAddress called with index:', index);
-    const addressParts = addressObj.address.split(', ');
-    const nameParts = addressObj.name.split(' ');
-    if (addressParts.length >= 3) {
-      const stateZip = addressParts[2]?.split(' ') || [];
+    try {
+      setLoading(true);
+      
+      if (editingIndex !== null) {
+        console.log('Updating address at index:', editingIndex);
+        const addressToUpdate = addresses[editingIndex];
+        
+        const { error } = await supabase
+          .from('addresses')
+          .update({
+            name: `${formData.firstName} ${formData.lastName}`,
+            street: formData.street,
+            city: formData.city,
+            state: formData.state,
+            zip: formData.zip
+          })
+          .eq('id', addressToUpdate.id);
+          
+        if (error) throw error;
+        
+        setEditingIndex(null);
+        toast({
+          title: "Address updated successfully!",
+          description: "Your address has been updated.",
+        });
+      } else {
+        console.log('Adding new address');
+        
+        const { error } = await supabase
+          .from('addresses')
+          .insert({
+            user_id: user!.id,
+            name: `${formData.firstName} ${formData.lastName}`,
+            street: formData.street,
+            city: formData.city,
+            state: formData.state,
+            zip: formData.zip
+          });
+          
+        if (error) throw error;
+        
+        toast({
+          title: "Address saved successfully!",
+          description: "Your new address has been added to your profile.",
+        });
+      }
+      
+      // Reload addresses from database
+      await loadAddresses();
+      
+      // Clear address form fields only
       setFormData(prev => ({
         ...prev,
-        firstName: nameParts[0] || '',
-        lastName: nameParts.slice(1).join(' ') || '',
-        street: addressParts[0] || '',
-        city: addressParts[1] || '',
-        state: stateZip[0] || '',
-        zip: stateZip[1] || ''
+        street: '',
+        city: '',
+        state: '',
+        zip: ''
       }));
-      setEditingIndex(index);
-      setActiveTab('personal');
+    } catch (error) {
+      console.error('Error saving address:', error);
+      toast({
+        title: "Error saving address",
+        description: "Please try again later.",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
     }
   };
 
-  const handleDeleteAddress = (addressToDelete: {name: string, address: string}) => {
-    setAddresses(prev => prev.filter(addr => addr.name !== addressToDelete.name || addr.address !== addressToDelete.address));
-    toast({
-      title: "Address deleted",
-      description: "The address has been removed from your profile.",
-    });
+  const handleEditAddress = (addressObj: {id: string, name: string, street: string, city: string, state: string, zip: string}, index: number) => {
+    console.log('handleEditAddress called with index:', index);
+    const nameParts = addressObj.name.split(' ');
+    setFormData(prev => ({
+      ...prev,
+      firstName: nameParts[0] || '',
+      lastName: nameParts.slice(1).join(' ') || '',
+      street: addressObj.street || '',
+      city: addressObj.city || '',
+      state: addressObj.state || '',
+      zip: addressObj.zip || ''
+    }));
+    setEditingIndex(index);
+    setActiveTab('personal');
+  };
+
+  const handleDeleteAddress = async (addressToDelete: {id: string, name: string, street: string, city: string, state: string, zip: string}) => {
+    try {
+      setLoading(true);
+      
+      const { error } = await supabase
+        .from('addresses')
+        .delete()
+        .eq('id', addressToDelete.id);
+        
+      if (error) throw error;
+      
+      // Reload addresses from database
+      await loadAddresses();
+      
+      toast({
+        title: "Address deleted",
+        description: "The address has been removed from your profile.",
+      });
+    } catch (error) {
+      console.error('Error deleting address:', error);
+      toast({
+        title: "Error deleting address",
+        description: "Please try again later.",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   // Load payment methods
@@ -391,8 +474,9 @@ const Profile = () => {
                     <Button 
                       className="bg-grocery-primary hover:bg-grocery-dark text-white"
                       onClick={handleSaveChanges}
+                      disabled={loading}
                     >
-                      {editingIndex !== null ? 'Update Address' : 'Save Changes'}
+                      {loading ? "Saving..." : editingIndex !== null ? 'Update Address' : 'Save Changes'}
                     </Button>
                   </CardContent>
                 </Card>
@@ -412,10 +496,10 @@ const Profile = () => {
                         </div>
                       ) : (
                         addresses.map((addressObj, index) => (
-                          <div key={index} className="flex items-center justify-between p-4 border rounded-lg">
+                          <div key={addressObj.id} className="flex items-center justify-between p-4 border rounded-lg">
                             <div>
                               <p className="font-medium">{addressObj.name}</p>
-                              <p className="text-sm text-gray-600">{addressObj.address}</p>
+                              <p className="text-sm text-gray-600">{addressObj.street}, {addressObj.city}, {addressObj.state} {addressObj.zip}</p>
                             </div>
                             <DropdownMenu>
                               <DropdownMenuTrigger asChild>
