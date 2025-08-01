@@ -42,35 +42,61 @@ const Profile = () => {
   }, [user, authLoading, navigate]);
 
   // Load addresses from database
-  const loadAddresses = async () => {
-    if (!user) return;
-    
-    try {
-      const { data, error } = await supabase
-        .from('addresses')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false });
-      
-      if (error) throw error;
-      
-      setAddresses(data || []);
-    } catch (error) {
-      console.error('Error loading addresses:', error);
-      toast({
-        title: "Error loading addresses",
-        description: "Please try again later.",
-        variant: "destructive"
-      });
-    }
-  };
-
-  // Load addresses when user is available
   useEffect(() => {
+    const loadAddresses = async () => {
+      if (!user) return;
+      
+      try {
+        const { data, error } = await supabase
+          .from('addresses')
+          .select('*')
+          .eq('user_id', user.id)
+          .order('created_at', { ascending: false });
+        
+        if (error) throw error;
+        
+        setAddresses(data || []);
+      } catch (error) {
+        console.error('Error loading addresses:', error);
+        toast({
+          title: "Error loading addresses",
+          description: "Please try again later.",
+          variant: "destructive"
+        });
+      }
+    };
+
     if (user) {
       loadAddresses();
     }
-  }, [user]);
+  }, [user, toast]);
+
+  // Load payment methods when payments tab is active
+  useEffect(() => {
+    const loadPaymentMethods = async () => {
+      try {
+        setLoading(true);
+        const { data, error } = await supabase.functions.invoke('get-payment-methods');
+        
+        if (error) throw error;
+        
+        setPaymentMethods(data.payment_methods || []);
+      } catch (error) {
+        console.error('Error loading payment methods:', error);
+        toast({
+          title: "Error loading payment methods",
+          description: "Please try again later.",
+          variant: "destructive"
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (activeTab === 'payments' && user) {
+      loadPaymentMethods();
+    }
+  }, [activeTab, user, toast]);
 
   // If still loading auth or no user, show loading
   if (authLoading || !user) {
@@ -97,6 +123,29 @@ const Profile = () => {
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
+  };
+
+  const loadAddresses = async () => {
+    if (!user) return;
+    
+    try {
+      const { data, error } = await supabase
+        .from('addresses')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false });
+      
+      if (error) throw error;
+      
+      setAddresses(data || []);
+    } catch (error) {
+      console.error('Error loading addresses:', error);
+      toast({
+        title: "Error loading addresses",
+        description: "Please try again later.",
+        variant: "destructive"
+      });
+    }
   };
 
   const handleSaveChanges = async () => {
@@ -250,7 +299,6 @@ const Profile = () => {
     }
   };
 
-  // Load payment methods
   const loadPaymentMethods = async () => {
     try {
       setLoading(true);
@@ -304,13 +352,6 @@ const Profile = () => {
       setLoading(false);
     }
   };
-
-  // Load payment methods when payments tab is active
-  useEffect(() => {
-    if (activeTab === 'payments') {
-      loadPaymentMethods();
-    }
-  }, [activeTab]);
 
   return (
     <div className="flex flex-col min-h-screen">
