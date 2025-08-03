@@ -76,11 +76,9 @@ const Profile = () => {
     const loadPaymentMethods = async () => {
       try {
         setLoading(true);
-        const { data, error } = await supabase.functions.invoke('get-payment-methods');
-        
-        if (error) throw error;
-        
-        setPaymentMethods(data.payment_methods || []);
+        // Load from localStorage for demo - supports Indian cards better
+        const savedCards = JSON.parse(localStorage.getItem('savedCards') || '[]');
+        setPaymentMethods(savedCards);
       } catch (error) {
         console.error('Error loading payment methods:', error);
         toast({
@@ -302,11 +300,9 @@ const Profile = () => {
   const loadPaymentMethods = async () => {
     try {
       setLoading(true);
-      const { data, error } = await supabase.functions.invoke('get-payment-methods');
-      
-      if (error) throw error;
-      
-      setPaymentMethods(data.payment_methods || []);
+      // Load from localStorage for demo - supports Indian cards better
+      const savedCards = JSON.parse(localStorage.getItem('savedCards') || '[]');
+      setPaymentMethods(savedCards);
     } catch (error) {
       console.error('Error loading payment methods:', error);
       toast({
@@ -328,11 +324,10 @@ const Profile = () => {
   const handleDeletePaymentMethod = async (paymentMethodId: string) => {
     try {
       setLoading(true);
-      const { error } = await supabase.functions.invoke('delete-payment-method', {
-        body: { payment_method_id: paymentMethodId }
-      });
-      
-      if (error) throw error;
+      // Delete from localStorage for demo
+      const savedCards = JSON.parse(localStorage.getItem('savedCards') || '[]');
+      const updatedCards = savedCards.filter((card: any) => card.id !== paymentMethodId);
+      localStorage.setItem('savedCards', JSON.stringify(updatedCards));
       
       toast({
         title: "Payment method deleted",
