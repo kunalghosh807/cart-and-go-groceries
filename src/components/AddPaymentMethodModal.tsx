@@ -74,10 +74,25 @@ const AddPaymentMethodForm: React.FC<{ onSuccess: () => void; onClose: () => voi
 
   const getCardBrand = (cardNumber: string) => {
     const number = cardNumber.replace(/\s/g, '');
-    if (number.startsWith('4')) return 'visa';
-    if (number.startsWith('5') || number.startsWith('2')) return 'mastercard';
-    if (number.startsWith('6')) return 'rupay';
-    if (number.startsWith('3')) return 'amex';
+    
+    // RuPay card ranges (Indian domestic card network)
+    if (/^(60|65|81|82|508|353|356)/.test(number)) return 'rupay';
+    
+    // Visa cards start with 4
+    if (/^4/.test(number)) return 'visa';
+    
+    // Mastercard ranges: 51-55, 2221-2720
+    if (/^5[1-5]/.test(number) || /^2[2-7]/.test(number)) return 'mastercard';
+    
+    // American Express: 34, 37
+    if (/^3[47]/.test(number)) return 'amex';
+    
+    // Discover: 6011, 644-649, 65
+    if (/^(6011|64[4-9]|65)/.test(number)) return 'discover';
+    
+    // Diners Club: 300-305, 36, 38
+    if (/^(30[0-5]|36|38)/.test(number)) return 'diners';
+    
     return 'unknown';
   };
 
