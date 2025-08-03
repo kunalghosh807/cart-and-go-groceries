@@ -24,30 +24,43 @@ interface CartContextType {
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
 export const CartProvider = ({ children }: { children: ReactNode }) => {
-  const [cartItems, setCartItems] = useState<Product[]>([]);
+  const [cartItems, setCartItems] = useState<Product[]>(() => {
+    // Load cart from localStorage on initialization
+    try {
+      const savedCart = localStorage.getItem('cart');
+      return savedCart ? JSON.parse(savedCart) : [];
+    } catch (error) {
+      console.error('Error loading cart from localStorage:', error);
+      return [];
+    }
+  });
 
   const addToCart = (product: Product) => {
     setCartItems((prevItems) => {
       // Check if the product is already in the cart
       const existingItemIndex = prevItems.findIndex(item => item.id === product.id);
       
+      let newItems;
       if (existingItemIndex !== -1) {
         // If item exists, update its quantity
-        const newItems = [...prevItems];
+        newItems = [...prevItems];
         newItems[existingItemIndex].quantity += 1;
         toast({
           title: "Quantity updated",
           description: `${product.name} quantity increased to ${newItems[existingItemIndex].quantity}`
         });
-        return newItems;
       } else {
         // Add new item with quantity of 1
+        newItems = [...prevItems, { ...product, quantity: 1 }];
         toast({
           title: "Added to cart",
           description: `${product.name} added to your cart`
         });
-        return [...prevItems, { ...product, quantity: 1 }];
       }
+      
+      // Save to localStorage
+      localStorage.setItem('cart', JSON.stringify(newItems));
+      return newItems;
     });
   };
 
@@ -60,7 +73,11 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
           description: `${itemToRemove.name} removed from your cart`
         });
       }
-      return prevItems.filter(item => item.id !== productId);
+      const newItems = prevItems.filter(item => item.id !== productId);
+      
+      // Save to localStorage
+      localStorage.setItem('cart', JSON.stringify(newItems));
+      return newItems;
     });
   };
 
@@ -70,15 +87,20 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
       return;
     }
     
-    setCartItems((prevItems) => 
-      prevItems.map(item => 
+    setCartItems((prevItems) => {
+      const newItems = prevItems.map(item => 
         item.id === productId ? { ...item, quantity } : item
-      )
-    );
+      );
+      
+      // Save to localStorage
+      localStorage.setItem('cart', JSON.stringify(newItems));
+      return newItems;
+    });
   };
 
   const clearCart = () => {
     setCartItems([]);
+    localStorage.removeItem('cart');
     toast({
       title: "Cart cleared",
       description: "All items have been removed from your cart"
