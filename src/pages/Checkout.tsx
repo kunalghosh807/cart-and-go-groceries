@@ -1,20 +1,86 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useCart } from '@/hooks/useCart';
-import { ArrowLeft } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { ArrowLeft, CreditCard, Smartphone } from 'lucide-react';
+import { toast } from 'sonner';
 
 const Checkout = () => {
-  const { cartItems, getTotalPrice } = useCart();
+  const { cartItems, getTotalPrice, clearCart } = useCart();
   const navigate = useNavigate();
+  const [isProcessing, setIsProcessing] = useState(false);
 
   if (cartItems.length === 0) {
     navigate('/cart');
     return null;
   }
+
+  const totalAmount = getTotalPrice() + 5.99;
+
+  const handlePayment = async () => {
+    setIsProcessing(true);
+    try {
+      // Create Razorpay order
+      const { data, error } = await supabase.functions.invoke('create-razorpay-order', {
+        body: { amount: totalAmount, currency: 'INR' }
+      });
+
+      if (error) throw error;
+
+      const { orderId, amount, currency, keyId } = data;
+
+      // Load Razorpay script
+      const script = document.createElement('script');
+      script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+      script.onload = () => {
+        const options = {
+          key: keyId,
+          amount: amount,
+          currency: currency,
+          name: 'TechMart',
+          description: 'Order Payment',
+          order_id: orderId,
+          handler: function (response: any) {
+            toast.success('Payment successful!');
+            clearCart();
+            navigate('/');
+          },
+          prefill: {
+            name: 'Customer',
+            email: 'customer@example.com',
+          },
+          theme: {
+            color: '#3B82F6'
+          },
+          method: {
+            upi: true,
+            card: true,
+            netbanking: true,
+            wallet: true,
+          }
+        };
+
+        const rzp = new (window as any).Razorpay(options);
+        rzp.open();
+        
+        rzp.on('payment.failed', function (response: any) {
+          toast.error('Payment failed. Please try again.');
+        });
+      };
+      
+      document.body.appendChild(script);
+      
+    } catch (error) {
+      console.error('Payment error:', error);
+      toast.error('Failed to initiate payment. Please try again.');
+    } finally {
+      setIsProcessing(false);
+    }
+  };
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -85,12 +151,30 @@ const Checkout = () => {
                 <CardHeader>
                   <CardTitle>Payment Details</CardTitle>
                 </CardHeader>
-                <CardContent>
-                  <div className="text-center py-8">
-                    <p className="text-gray-600 mb-4">Payment integration coming soon!</p>
-                    <p className="text-sm text-gray-500">
-                      This is a demo checkout page. In a real application, you would integrate with a payment processor like Stripe or PayPal.
+                <CardContent className="space-y-6">
+                  <div className="text-center">
+                    <h3 className="text-lg font-semibold mb-4">Choose Payment Method</h3>
+                    <div className="grid grid-cols-2 gap-4 mb-6">
+                      <div className="flex items-center justify-center p-4 border rounded-lg bg-blue-50">
+                        <Smartphone className="h-6 w-6 mr-2 text-blue-600" />
+                        <span className="font-medium">UPI</span>
+                      </div>
+                      <div className="flex items-center justify-center p-4 border rounded-lg bg-green-50">
+                        <CreditCard className="h-6 w-6 mr-2 text-green-600" />
+                        <span className="font-medium">Cards</span>
+                      </div>
+                    </div>
+                    <p className="text-sm text-muted-foreground mb-6">
+                      Secure payment with UPI, Debit Cards, Credit Cards & Net Banking
                     </p>
+                    <Button 
+                      onClick={handlePayment}
+                      disabled={isProcessing}
+                      className="w-full"
+                      size="lg"
+                    >
+                      {isProcessing ? 'Processing...' : `Pay ₹${totalAmount.toFixed(2)}`}
+                    </Button>
                   </div>
                 </CardContent>
               </Card>
