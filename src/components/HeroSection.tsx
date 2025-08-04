@@ -20,20 +20,11 @@ const HeroSection = () => {
       <div className="relative h-full flex items-center justify-center px-4 sm:px-6 lg:px-8">
         <div className="max-w-3xl mx-auto text-center text-white">
           <h1 className="text-3xl md:text-4xl font-bold mb-4">
-            Fresh Groceries, <span className="text-yellow-300">Delivered Fast</span>
+            Welcome to <span className="text-yellow-300">Cart & Go</span>
           </h1>
           <p className="text-lg text-gray-200 mb-6 max-w-2xl mx-auto">
-            Shop from thousands of items and get your groceries delivered to your doorstep in as little as 2 hours.
+            Your trusted grocery partner - Fresh products, fast delivery, unbeatable convenience
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button className="bg-grocery-primary hover:bg-grocery-dark text-white px-6 py-3">
-              Shop Now
-              <ChevronRight className="ml-2 h-5 w-5" />
-            </Button>
-            <Button variant="outline" className="border-white text-white hover:bg-white hover:text-gray-900 px-6 py-3">
-              View Deals
-            </Button>
-          </div>
         </div>
       </div>
     </div>

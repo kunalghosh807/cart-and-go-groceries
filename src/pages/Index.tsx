@@ -64,11 +64,8 @@ const Index = () => {
             <div className="bg-gradient-to-r from-grocery-primary to-grocery-secondary rounded-lg overflow-hidden">
               <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16 flex flex-col md:flex-row items-center justify-between">
                 <div className="text-white mb-6 md:mb-0 text-center md:text-left">
-                  <h2 className="text-2xl md:text-3xl font-bold mb-2">Weekend Special Offers</h2>
-                  <p className="text-white/90 text-lg mb-4">Get up to 40% off on selected items</p>
-                  <Button className="bg-white text-grocery-primary hover:bg-gray-100 hover:text-grocery-dark">
-                    Shop Deals Now <ChevronRight className="ml-2 h-5 w-5" />
-                  </Button>
+                  <h2 className="text-2xl md:text-3xl font-bold mb-2">Experience Cart & Go</h2>
+                  <p className="text-white/90 text-lg mb-4">Your one-stop solution for all grocery needs</p>
                 </div>
                 <div className="relative w-full md:w-1/2 h-48 md:h-64">
                   <img 
@@ -77,7 +74,7 @@ const Index = () => {
                     className="w-full h-full object-cover rounded-lg shadow-lg"
                   />
                   <div className="absolute top-0 right-0 bg-grocery-accent text-white font-bold py-2 px-4 rounded-bl-lg">
-                    SAVE 40%
+                    CART & GO
                   </div>
                 </div>
               </div>
