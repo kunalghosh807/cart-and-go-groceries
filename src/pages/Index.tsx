@@ -59,27 +59,6 @@ const Index = () => {
             </div>
           </section>
           
-          {/* Deal Banner */}
-          <section className="mb-12">
-            <div className="bg-gradient-to-r from-grocery-primary to-grocery-secondary rounded-lg overflow-hidden">
-              <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16 flex flex-col md:flex-row items-center justify-between">
-                <div className="text-white mb-6 md:mb-0 text-center md:text-left">
-                  <h2 className="text-2xl md:text-3xl font-bold mb-2">Experience Cart & Go</h2>
-                  <p className="text-white/90 text-lg mb-4">Your one-stop solution for all grocery needs</p>
-                </div>
-                <div className="relative w-full md:w-1/2 h-48 md:h-64">
-                  <img 
-                    src="https://images.unsplash.com/photo-1506617564039-2f3b650b7010?q=80&w=500&auto=format&fit=crop" 
-                    alt="Weekend deals" 
-                    className="w-full h-full object-cover rounded-lg shadow-lg"
-                  />
-                  <div className="absolute top-0 right-0 bg-grocery-accent text-white font-bold py-2 px-4 rounded-bl-lg">
-                    CART & GO
-                  </div>
-                </div>
-              </div>
-            </div>
-          </section>
           
           {/* Deal Products */}
           <section className="mb-12">
