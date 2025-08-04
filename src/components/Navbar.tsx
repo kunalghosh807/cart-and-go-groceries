@@ -16,9 +16,17 @@ import {
 
 const Navbar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
   const { cartItems, getItemsCount } = useCart();
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      navigate(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
+    }
+  };
 
   const handleSignOut = async () => {
     await signOut();
@@ -38,7 +46,7 @@ const Navbar = () => {
           
           {/* Search bar - visible on larger screens */}
           <div className="hidden md:block flex-1 max-w-md mx-4">
-            <div className="relative">
+            <form onSubmit={handleSearch} className="relative">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                 <Search className="h-5 w-5 text-gray-400" />
               </div>
@@ -46,8 +54,10 @@ const Navbar = () => {
                 type="text"
                 placeholder="Search for items..."
                 className="pl-10 py-2 w-full"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
               />
-            </div>
+            </form>
           </div>
           
           {/* Navigation links */}
@@ -121,7 +131,7 @@ const Navbar = () => {
         
         {/* Search bar - visible only on mobile */}
         <div className="md:hidden py-2 pb-4">
-          <div className="relative">
+          <form onSubmit={handleSearch} className="relative">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
               <Search className="h-5 w-5 text-gray-400" />
             </div>
@@ -129,8 +139,10 @@ const Navbar = () => {
               type="text"
               placeholder="Search for items..."
               className="pl-10 py-2 w-full"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
             />
-          </div>
+          </form>
         </div>
 
         {/* Mobile menu */}
