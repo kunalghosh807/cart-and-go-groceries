@@ -29,7 +29,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
         <p className="text-xs text-muted-foreground mb-1">{product.category}</p>
         <h3 className="font-medium text-sm mb-1 line-clamp-2">{product.name}</h3>
         <p className="text-base font-bold text-grocery-primary">
-          ${product.price.toFixed(2)}
+          ₹{product.price.toFixed(2)}
         </p>
       </CardContent>
       <CardFooter className="p-3 pt-0">
