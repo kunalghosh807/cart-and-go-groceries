@@ -17,15 +17,47 @@ import {
 const Navbar = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [suggestions, setSuggestions] = useState<any[]>([]);
   const { cartItems, getItemsCount } = useCart();
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
+
+  // Import products for suggestions
+  const allProducts = React.useMemo(() => {
+    const { featuredProducts, dealProducts } = require('@/data/mockData');
+    return [...featuredProducts, ...dealProducts];
+  }, []);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchQuery.trim()) {
       navigate(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
+      setShowSuggestions(false);
     }
+  };
+
+  const handleSearchInputChange = (value: string) => {
+    setSearchQuery(value);
+    
+    if (value.trim().length > 0) {
+      const filtered = allProducts.filter(product =>
+        product.name.toLowerCase().includes(value.toLowerCase()) ||
+        product.category.toLowerCase().includes(value.toLowerCase())
+      ).slice(0, 5); // Limit to 5 suggestions
+      
+      setSuggestions(filtered);
+      setShowSuggestions(true);
+    } else {
+      setShowSuggestions(false);
+      setSuggestions([]);
+    }
+  };
+
+  const selectSuggestion = (product: any) => {
+    setSearchQuery(product.name);
+    setShowSuggestions(false);
+    navigate(`/search?q=${encodeURIComponent(product.name)}`);
   };
 
   const handleSignOut = async () => {
@@ -45,7 +77,7 @@ const Navbar = () => {
           </div>
           
           {/* Search bar - visible on larger screens */}
-          <div className="hidden md:block flex-1 max-w-md mx-4">
+          <div className="hidden md:block flex-1 max-w-md mx-4 relative">
             <form onSubmit={handleSearch} className="relative">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                 <Search className="h-5 w-5 text-gray-400" />
@@ -55,9 +87,40 @@ const Navbar = () => {
                 placeholder="Search for items..."
                 className="pl-10 py-2 w-full"
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={(e) => handleSearchInputChange(e.target.value)}
+                onFocus={() => searchQuery.length > 0 && setShowSuggestions(true)}
+                onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
               />
             </form>
+            
+            {/* Search Suggestions Dropdown */}
+            {showSuggestions && suggestions.length > 0 && (
+              <div className="absolute top-full left-0 right-0 bg-white border border-gray-200 rounded-lg shadow-lg z-50 mt-1">
+                <ul className="py-2">
+                  {suggestions.map((product) => (
+                    <li key={product.id}>
+                      <button
+                        onClick={() => selectSuggestion(product)}
+                        className="w-full text-left px-4 py-2 hover:bg-gray-100 flex items-center space-x-3"
+                      >
+                        <img 
+                          src={product.image} 
+                          alt={product.name}
+                          className="w-8 h-8 object-cover rounded"
+                        />
+                        <div>
+                          <div className="font-medium text-sm">{product.name}</div>
+                          <div className="text-xs text-gray-500">{product.category}</div>
+                        </div>
+                        <div className="ml-auto text-sm font-bold text-grocery-primary">
+                          ₹{product.price.toFixed(2)}
+                        </div>
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
           </div>
           
           {/* Navigation links */}
@@ -130,7 +193,7 @@ const Navbar = () => {
         </div>
         
         {/* Search bar - visible only on mobile */}
-        <div className="md:hidden py-2 pb-4">
+        <div className="md:hidden py-2 pb-4 relative">
           <form onSubmit={handleSearch} className="relative">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
               <Search className="h-5 w-5 text-gray-400" />
@@ -140,9 +203,40 @@ const Navbar = () => {
               placeholder="Search for items..."
               className="pl-10 py-2 w-full"
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={(e) => handleSearchInputChange(e.target.value)}
+              onFocus={() => searchQuery.length > 0 && setShowSuggestions(true)}
+              onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
             />
           </form>
+          
+          {/* Mobile Search Suggestions Dropdown */}
+          {showSuggestions && suggestions.length > 0 && (
+            <div className="absolute top-full left-0 right-0 bg-white border border-gray-200 rounded-lg shadow-lg z-50 mt-1">
+              <ul className="py-2">
+                {suggestions.map((product) => (
+                  <li key={product.id}>
+                    <button
+                      onClick={() => selectSuggestion(product)}
+                      className="w-full text-left px-4 py-2 hover:bg-gray-100 flex items-center space-x-3"
+                    >
+                      <img 
+                        src={product.image} 
+                        alt={product.name}
+                        className="w-8 h-8 object-cover rounded"
+                      />
+                      <div>
+                        <div className="font-medium text-sm">{product.name}</div>
+                        <div className="text-xs text-gray-500">{product.category}</div>
+                      </div>
+                      <div className="ml-auto text-sm font-bold text-grocery-primary">
+                        ₹{product.price.toFixed(2)}
+                      </div>
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
         </div>
 
         {/* Mobile menu */}
