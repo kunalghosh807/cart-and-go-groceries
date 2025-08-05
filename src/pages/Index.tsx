@@ -24,7 +24,7 @@ const Index = () => {
           {/* Categories Section */}
           <section className="mb-12">
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-2xl font-bold">Categories</h2>
+              <h2 className="text-xl font-bold">Grocery & Kitchen</h2>
               <Button variant="link" className="text-grocery-primary">
                 View All <ChevronRight className="h-4 w-4 ml-1" />
               </Button>
