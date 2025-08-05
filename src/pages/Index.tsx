@@ -29,14 +29,15 @@ const Index = () => {
                 View All <ChevronRight className="h-4 w-4 ml-1" />
               </Button>
             </div>
-            <div className="grid grid-cols-4 gap-3">
-              {categories.slice(0, 8).map((category) => (
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+              {categories.map((category) => (
                 <CategoryCard 
                   key={category.id}
                   id={category.id}
                   name={category.name} 
                   image={category.image} 
-                  productCount={category.productCount} 
+                  productCount={category.productCount}
+                  subcategories={category.subcategories}
                 />
               ))}
             </div>
