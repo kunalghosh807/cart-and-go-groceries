@@ -1,64 +1,124 @@
 
 export const categories = [
-  { 
-    id: 'grocery-kitchen', 
-    name: 'Grocery & Kitchen', 
-    image: 'https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=400&h=300&fit=crop',
-    productCount: 245,
-    subcategories: [
-      'Vegetables & Fruits',
-      'Atta, Rice & Dal', 
-      'Oil, Ghee & Masala',
-      'Dairy, Bread & Eggs',
-      'Bakery & Biscuits',
-      'Dry Fruits & Cereals',
-      'Chicken, Meat & Fish',
-      'Kitchenware & Appliances'
-    ]
+  {
+    id: "vegetables-fruits",
+    name: "Vegetables & Fruits",
+    image: "https://images.unsplash.com/photo-1610832958506-aa56368176cf?q=80&w=500&auto=format&fit=crop",
+    productCount: 68
   },
-  { 
-    id: 'snacks-drinks', 
-    name: 'Snacks & Drinks', 
-    image: 'https://images.unsplash.com/photo-1566478989037-eec170784d0b?w=400&h=300&fit=crop',
-    productCount: 189,
-    subcategories: [
-      'Chips & Namkeen',
-      'Sweets & Chocolates',
-      'Drinks & Juices', 
-      'Tea, Coffee & Milk Drinks',
-      'Instant Food',
-      'Sauces & Spreads',
-      'Paan Corner',
-      'Ice Creams & More'
-    ]
+  {
+    id: "atta-rice-dal",
+    name: "Atta, Rice & Dal",
+    image: "https://images.unsplash.com/photo-1586201375761-83865001e31c?q=80&w=500&auto=format&fit=crop",
+    productCount: 45
   },
-  { 
-    id: 'beauty-personal-care', 
-    name: 'Beauty & Personal Care', 
-    image: 'https://images.unsplash.com/photo-1556228453-efd6c1ff04f6?w=400&h=300&fit=crop',
-    productCount: 134,
-    subcategories: [
-      'Bath & Body',
-      'Hair',
-      'Skin & Face',
-      'Beauty & Cosmetics', 
-      'Feminine Hygiene',
-      'Baby Care',
-      'Health & Pharma',
-      'Sexual Wellness'
-    ]
+  {
+    id: "oil-ghee-masala",
+    name: "Oil, Ghee & Masala",
+    image: "https://images.unsplash.com/photo-1596040033229-a9821ebd058d?q=80&w=500&auto=format&fit=crop",
+    productCount: 35
   },
-  { 
-    id: 'household-essentials', 
-    name: 'Household & Essentials', 
-    image: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&h=300&fit=crop',
-    productCount: 98,
-    subcategories: [
-      'Lifestyle',
-      'Cleaners & Repellents',
-      'Electronics',
-      'Stationery & Games'
-    ]
+  {
+    id: "dairy-bread-eggs",
+    name: "Dairy, Bread & Eggs",
+    image: "https://images.unsplash.com/photo-1550583724-b2692b85b150?q=80&w=500&auto=format&fit=crop",
+    productCount: 52
+  },
+  {
+    id: "bakery-biscuits",
+    name: "Bakery & Biscuits",
+    image: "https://images.unsplash.com/photo-1509440159596-0249088772ff?q=80&w=500&auto=format&fit=crop",
+    productCount: 38
+  },
+  {
+    id: "dry-fruits-cereals",
+    name: "Dry Fruits & Cereals",
+    image: "https://images.unsplash.com/photo-1511688878353-3a2f5be94cd7?q=80&w=500&auto=format&fit=crop",
+    productCount: 29
+  },
+  {
+    id: "chicken-meat-fish",
+    name: "Chicken, Meat & Fish",
+    image: "https://images.unsplash.com/photo-1607623814075-e51df1bdc82f?q=80&w=500&auto=format&fit=crop",
+    productCount: 24
+  },
+  {
+    id: "kitchenware-appliances",
+    name: "Kitchenware & Appliances",
+    image: "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?q=80&w=500&auto=format&fit=crop",
+    productCount: 67
+  },
+  {
+    id: "chips-namkeen",
+    name: "Chips & Namkeen",
+    image: "https://images.unsplash.com/photo-1566478989037-eec170784d0b?q=80&w=500&auto=format&fit=crop",
+    productCount: 42
+  },
+  {
+    id: "sweets-chocolates",
+    name: "Sweets & Chocolates",
+    image: "https://images.unsplash.com/photo-1511381939415-e44015466834?q=80&w=500&auto=format&fit=crop",
+    productCount: 36
+  },
+  {
+    id: "drinks-juices",
+    name: "Drinks & Juices",
+    image: "https://images.unsplash.com/photo-1437418747212-8d9709afab22?q=80&w=500&auto=format&fit=crop",
+    productCount: 48
+  },
+  {
+    id: "tea-coffee-milk-drinks",
+    name: "Tea, Coffee & Milk Drinks",
+    image: "https://images.unsplash.com/photo-1497515114629-f71d768fd07c?q=80&w=500&auto=format&fit=crop",
+    productCount: 33
+  },
+  {
+    id: "instant-food",
+    name: "Instant Food",
+    image: "https://images.unsplash.com/photo-1607532941433-304659e8198a?q=80&w=500&auto=format&fit=crop",
+    productCount: 25
+  },
+  {
+    id: "sauces-spreads",
+    name: "Sauces & Spreads",
+    image: "https://images.unsplash.com/photo-1472476443507-c7a5948772fc?q=80&w=500&auto=format&fit=crop",
+    productCount: 31
+  },
+  {
+    id: "paan-corner",
+    name: "Paan Corner",
+    image: "https://images.unsplash.com/photo-1609501676725-7186f834b17c?q=80&w=500&auto=format&fit=crop",
+    productCount: 18
+  },
+  {
+    id: "ice-creams-more",
+    name: "Ice Creams & More",
+    image: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?q=80&w=500&auto=format&fit=crop",
+    productCount: 41
+  },
+  {
+    id: "bath-body",
+    name: "Bath & Body",
+    image: "https://images.unsplash.com/photo-1556228578-626910bf4405?q=80&w=500&auto=format&fit=crop",
+    productCount: 45
+  },
+  {
+    id: "hair",
+    name: "Hair",
+    image: "https://images.unsplash.com/photo-1522338140262-f46f5913618e?q=80&w=500&auto=format&fit=crop",
+    productCount: 28
+  },
+  {
+    id: "skin-face",
+    name: "Skin & Face",
+    image: "https://images.unsplash.com/photo-1570194065650-d99fb4bedf0a?q=80&w=500&auto=format&fit=crop",
+    productCount: 39
+  },
+  {
+    id: "beauty-cosmetics",
+    name: "Beauty & Cosmetics",
+    image: "https://images.unsplash.com/photo-1596462502278-27bfdc403348?q=80&w=500&auto=format&fit=crop",
+    productCount: 52
   }
 ];
 
