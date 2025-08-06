@@ -80,6 +80,27 @@ const Index = () => {
             </div>
           </section>
           
+          {/* Beauty & Personal Care Section */}
+          <section className="mb-12">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-xl font-bold">Beauty & Personal Care</h2>
+              <Button variant="link" className="text-grocery-primary">
+                View All <ChevronRight className="h-4 w-4 ml-1" />
+              </Button>
+            </div>
+            <div className="grid grid-cols-4 gap-3">
+              {categories.slice(16, 24).map((category) => (
+                <CategoryCard 
+                  key={category.id}
+                  id={category.id}
+                  name={category.name} 
+                  image={category.image} 
+                  productCount={category.productCount} 
+                />
+              ))}
+            </div>
+          </section>
+          
           {/* Deal Products */}
           <section className="mb-12">
             <div className="flex items-center justify-between mb-6">

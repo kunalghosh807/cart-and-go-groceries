@@ -119,6 +119,30 @@ export const categories = [
     name: "Beauty & Cosmetics",
     image: "https://images.unsplash.com/photo-1596462502278-27bfdc403348?q=80&w=500&auto=format&fit=crop",
     productCount: 52
+  },
+  {
+    id: "feminine-hygiene",
+    name: "Feminine Hygiene",
+    image: "https://images.unsplash.com/photo-1559757148-5c350d0d3c56?q=80&w=500&auto=format&fit=crop",
+    productCount: 26
+  },
+  {
+    id: "baby-care",
+    name: "Baby Care",
+    image: "https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?q=80&w=500&auto=format&fit=crop",
+    productCount: 34
+  },
+  {
+    id: "health-pharma",
+    name: "Health & Pharma",
+    image: "https://images.unsplash.com/photo-1559757175-0eb30cd8c063?q=80&w=500&auto=format&fit=crop",
+    productCount: 41
+  },
+  {
+    id: "sexual-wellness",
+    name: "Sexual Wellness",
+    image: "https://images.unsplash.com/photo-1559757148-5c350d0d3c56?q=80&w=500&auto=format&fit=crop",
+    productCount: 19
   }
 ];
 
