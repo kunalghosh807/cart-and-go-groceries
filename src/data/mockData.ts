@@ -335,3 +335,9 @@ export const categoryProducts = {
     { id: 504, name: "Paneer 200g", price: 3.99, image: "https://images.unsplash.com/photo-1631452180314-68d3e2d4c9b5?q=80&w=500&auto=format&fit=crop", category: "Dairy, Bread & Eggs", quantity: 0 }
   ]
 };
+
+// Function to get all products from all categories for search
+export const getAllProducts = () => {
+  const categoryProductsList = Object.values(categoryProducts).flat();
+  return [...featuredProducts, ...dealProducts, ...categoryProductsList];
+};

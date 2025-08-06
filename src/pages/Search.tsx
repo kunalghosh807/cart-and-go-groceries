@@ -3,10 +3,10 @@ import { useSearchParams } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import ProductCard from '@/components/ProductCard';
-import { featuredProducts, dealProducts } from '@/data/mockData';
+import { getAllProducts } from '@/data/mockData';
 
-// Combine all products for search
-const allProducts = [...featuredProducts, ...dealProducts];
+// Get all products for search including category products
+const allProducts = getAllProducts();
 
 const Search = () => {
   const [searchParams] = useSearchParams();
