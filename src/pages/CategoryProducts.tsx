@@ -22,7 +22,7 @@ const CategoryProducts = () => {
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="text-center">
             <h1 className="text-2xl font-bold text-foreground">Category not found</h1>
-            <Button onClick={() => navigate('/categories')} className="mt-4">
+            <Button onClick={() => navigate(-1)} className="mt-4">
               Back to Categories
             </Button>
           </div>
@@ -41,7 +41,7 @@ const CategoryProducts = () => {
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => navigate('/categories')}
+            onClick={() => navigate(-1)}
             className="flex items-center gap-2"
           >
             <ArrowLeft className="h-4 w-4" />

@@ -123,7 +123,7 @@ export const categories = [
   {
     id: "feminine-hygiene",
     name: "Feminine Hygiene",
-    image: "https://images.unsplash.com/photo-1559757148-5c350d0d3c56?q=80&w=500&auto=format&fit=crop",
+    image: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?q=80&w=500&auto=format&fit=crop",
     productCount: 26
   },
   {
@@ -135,13 +135,13 @@ export const categories = [
   {
     id: "health-pharma",
     name: "Health & Pharma",
-    image: "https://images.unsplash.com/photo-1559757175-0eb30cd8c063?q=80&w=500&auto=format&fit=crop",
+    image: "https://images.unsplash.com/photo-1471864190281-a93a3070b6de?q=80&w=500&auto=format&fit=crop",
     productCount: 41
   },
   {
     id: "sexual-wellness",
     name: "Sexual Wellness",
-    image: "https://images.unsplash.com/photo-1559757148-5c350d0d3c56?q=80&w=500&auto=format&fit=crop",
+    image: "https://images.unsplash.com/photo-1505751172876-fa1923c5c528?q=80&w=500&auto=format&fit=crop",
     productCount: 19
   }
 ];
