@@ -91,9 +91,9 @@ export const categories = [
     productCount: 18
   },
   {
-    id: "ice-creams-more",
-    name: "Ice Creams & More",
-    image: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?q=80&w=500&auto=format&fit=crop",
+    id: "cakes",
+    name: "Cakes",
+    image: "https://images.unsplash.com/photo-1578985545062-69928b1d9587?q=80&w=500&auto=format&fit=crop",
     productCount: 41
   },
   {
