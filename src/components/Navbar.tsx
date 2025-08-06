@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { useCart } from '@/hooks/useCart';
 import { useAuth } from '@/contexts/AuthContext';
-import { featuredProducts, dealProducts } from '@/data/mockData';
+import { getAllProducts } from '@/data/mockData';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -24,9 +24,9 @@ const Navbar = () => {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
 
-  // Combine products for suggestions
+  // Get all products including category products for suggestions
   const allProducts = React.useMemo(() => {
-    return [...featuredProducts, ...dealProducts];
+    return getAllProducts();
   }, []);
 
   const handleSearch = (e: React.FormEvent) => {
