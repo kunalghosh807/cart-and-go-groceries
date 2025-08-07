@@ -87,7 +87,7 @@ export const categories = [
   {
     id: "paan-corner",
     name: "Paan Corner",
-    image: "https://images.unsplash.com/photo-1609501676725-7186f834b17c?q=80&w=500&auto=format&fit=crop",
+    image: "https://cdn.grofers.com/cdn-cgi/image/f=auto,fit=scale-down,q=70,metadata=none,w=270/layout-engine/2022-12/paan-corner_web.png",
     productCount: 18
   },
   {
