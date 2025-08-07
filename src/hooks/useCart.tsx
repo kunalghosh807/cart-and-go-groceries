@@ -3,19 +3,25 @@ import React, { createContext, useContext, useState, ReactNode } from 'react';
 import { toast } from '@/components/ui/use-toast';
 
 export interface Product {
-  id: number;
+  id: string;
   name: string;
   price: number;
   image: string;
   category: string;
+  subcategory?: string;
+  description?: string;
+  stock_quantity: number;
+  is_featured: boolean;
+  is_deal: boolean;
+  deal_price?: number;
   quantity: number;
 }
 
 interface CartContextType {
   cartItems: Product[];
   addToCart: (product: Product) => void;
-  removeFromCart: (productId: number) => void;
-  updateQuantity: (productId: number, quantity: number) => void;
+  removeFromCart: (productId: string) => void;
+  updateQuantity: (productId: string, quantity: number) => void;
   clearCart: () => void;
   getTotalPrice: () => number;
   getItemsCount: () => number;
@@ -64,7 +70,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     });
   };
 
-  const removeFromCart = (productId: number) => {
+  const removeFromCart = (productId: string) => {
     setCartItems((prevItems) => {
       const itemToRemove = prevItems.find(item => item.id === productId);
       if (itemToRemove) {
@@ -81,7 +87,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     });
   };
 
-  const updateQuantity = (productId: number, quantity: number) => {
+  const updateQuantity = (productId: string, quantity: number) => {
     if (quantity < 1) {
       removeFromCart(productId);
       return;
