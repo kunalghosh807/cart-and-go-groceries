@@ -134,55 +134,19 @@ const Admin = () => {
     newImage: ''
   });
 
-  const [newCategoryName, setNewCategoryName] = useState('');
+  const [newCategoryData, setNewCategoryData] = useState({
+    name: '',
+    image: ''
+  });
   const [newSubcategoryData, setNewSubcategoryData] = useState({
     category: '',
-    subcategory: ''
+    subcategory: '',
+    image: ''
   });
 
-  // Dynamic categories and subcategories state
-  const [dynamicMainCategories, setDynamicMainCategories] = useState([
-    'Grocerry & Kitchen',
-    'Featured Products', 
-    'Snacks & Drinks',
-    'Beauty & Personal Care',
-    "Today's Deals"
-  ]);
-
-  const [dynamicSubcategoriesByCategory, setDynamicSubcategoriesByCategory] = useState({
-    'Grocerry & Kitchen': [
-      'Vegetables & Fruits',
-      'Atta, Rice & Dal', 
-      'Oil, Ghee & Masala',
-      'Dairy, Bread & Eggs',
-      'Bakery & Biscuits',
-      'Dry Fruits & Cereals',
-      'Chicken, Meat & Fish',
-      'Kitchenware & Appliances'
-    ],
-    'Snacks & Drinks': [
-      'Chips & Namkeen',
-      'Sweets & Chocolates',
-      'Drinks & Juices', 
-      'Tea, Coffee & Milk Drinks',
-      'Instant Food',
-      'Sauces & Spreads',
-      'Paan Corner',
-      'Cakes'
-    ],
-    'Beauty & Personal Care': [
-      'Bath & Body',
-      'Hair',
-      'Skin & Face',
-      'Beauty & Cosmetics',
-      'Feminine Hygiene',
-      'Baby Care',
-      'Health & Pharma',
-      'Sexual Wellness'
-    ],
-    'Featured Products': [],
-    "Today's Deals": []
-  });
+  // Database categories and subcategories state
+  const [dbCategories, setDbCategories] = useState<any[]>([]);
+  const [dbSubcategories, setDbSubcategories] = useState<any[]>([]);
 
   useEffect(() => {
     if (!user) {
@@ -190,6 +154,8 @@ const Admin = () => {
       return;
     }
     loadProducts();
+    loadCategories();
+    loadSubcategories();
   }, [user, navigate]);
 
   const loadProducts = async () => {
@@ -209,6 +175,38 @@ const Admin = () => {
       setProducts(data || []);
     }
     setLoading(false);
+  };
+
+  const loadCategories = async () => {
+    const { data, error } = await supabase
+      .from('categories')
+      .select('*')
+      .order('name');
+    
+    if (error) {
+      console.error('Error loading categories:', error);
+    } else {
+      setDbCategories(data || []);
+    }
+  };
+
+  const loadSubcategories = async () => {
+    const { data, error } = await supabase
+      .from('subcategories')
+      .select(`
+        *,
+        categories (
+          id,
+          name
+        )
+      `)
+      .order('name');
+    
+    if (error) {
+      console.error('Error loading subcategories:', error);
+    } else {
+      setDbSubcategories(data || []);
+    }
   };
 
   // Get unique categories from products
@@ -278,58 +276,21 @@ const Admin = () => {
     setEditingProduct(null);
   };
 
-  // Define main categories and their subcategories
-  const mainCategories = [
-    'Grocerry & Kitchen',
-    'Featured Products', 
-    'Snacks & Drinks',
-    'Beauty & Personal Care',
-    "Today's Deals"
-  ];
+  // Get main categories from database
+  const mainCategories = dbCategories.map(cat => cat.name);
 
-  const subcategoriesByCategory = {
-    'Grocerry & Kitchen': [
-      'Vegetables & Fruits',
-      'Atta, Rice & Dal', 
-      'Oil, Ghee & Masala',
-      'Dairy, Bread & Eggs',
-      'Bakery & Biscuits',
-      'Dry Fruits & Cereals',
-      'Chicken, Meat & Fish',
-      'Kitchenware & Appliances'
-    ],
-    'Snacks & Drinks': [
-      'Chips & Namkeen',
-      'Sweets & Chocolates',
-      'Drinks & Juices', 
-      'Tea, Coffee & Milk Drinks',
-      'Instant Food',
-      'Sauces & Spreads',
-      'Paan Corner',
-      'Cakes'
-    ],
-    'Beauty & Personal Care': [
-      'Bath & Body',
-      'Hair',
-      'Skin & Face',
-      'Beauty & Cosmetics',
-      'Feminine Hygiene',
-      'Baby Care',
-      'Health & Pharma',
-      'Sexual Wellness'
-    ],
-    'Featured Products': [],
-    "Today's Deals": []
-  };
-
-  // Get subcategories for selected category using dynamic data
+  // Get subcategories for selected category from database
   const getSubcategoriesForCategory = (category: string) => {
-    return dynamicSubcategoriesByCategory[category] || [];
+    const categoryFromDb = dbCategories.find(cat => cat.name === category);
+    if (!categoryFromDb) return [];
+    return dbSubcategories
+      .filter(sub => sub.categories?.name === category)
+      .map(sub => sub.name);
   };
 
   // Add new category
-  const addCategory = () => {
-    if (!newCategoryName.trim()) {
+  const addCategory = async () => {
+    if (!newCategoryData.name.trim()) {
       toast({
         title: "Invalid category name",
         description: "Please enter a valid category name",
@@ -338,32 +299,42 @@ const Admin = () => {
       return;
     }
 
-    if (dynamicMainCategories.includes(newCategoryName.trim())) {
-      toast({
-        title: "Category exists",
-        description: "This category already exists",
-        variant: "destructive",
-      });
+    const { error } = await supabase
+      .from('categories')
+      .insert([{
+        name: newCategoryData.name.trim(),
+        image: newCategoryData.image.trim() || null
+      }]);
+
+    if (error) {
+      if (error.code === '23505') { // Unique constraint violation
+        toast({
+          title: "Category exists",
+          description: "This category already exists",
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Error adding category",
+          description: error.message,
+          variant: "destructive",
+        });
+      }
       return;
     }
-
-    setDynamicMainCategories([...dynamicMainCategories, newCategoryName.trim()]);
-    setDynamicSubcategoriesByCategory({
-      ...dynamicSubcategoriesByCategory,
-      [newCategoryName.trim()]: []
-    });
     
     toast({
       title: "Category added",
-      description: `Category "${newCategoryName.trim()}" has been added successfully`,
+      description: `Category "${newCategoryData.name.trim()}" has been added successfully`,
     });
     
-    setNewCategoryName('');
+    setNewCategoryData({ name: '', image: '' });
     setIsCategoryModalOpen(false);
+    loadCategories();
   };
 
   // Add new subcategory
-  const addSubcategory = () => {
+  const addSubcategory = async () => {
     if (!newSubcategoryData.category || !newSubcategoryData.subcategory.trim()) {
       toast({
         title: "Invalid data",
@@ -373,31 +344,49 @@ const Admin = () => {
       return;
     }
 
-    const existingSubcategories = dynamicSubcategoriesByCategory[newSubcategoryData.category] || [];
-    if (existingSubcategories.includes(newSubcategoryData.subcategory.trim())) {
+    const category = dbCategories.find(cat => cat.name === newSubcategoryData.category);
+    if (!category) {
       toast({
-        title: "Subcategory exists",
-        description: "This subcategory already exists in the selected category",
+        title: "Category not found",
+        description: "Selected category does not exist",
         variant: "destructive",
       });
       return;
     }
 
-    setDynamicSubcategoriesByCategory({
-      ...dynamicSubcategoriesByCategory,
-      [newSubcategoryData.category]: [
-        ...existingSubcategories,
-        newSubcategoryData.subcategory.trim()
-      ]
-    });
+    const { error } = await supabase
+      .from('subcategories')
+      .insert([{
+        name: newSubcategoryData.subcategory.trim(),
+        category_id: category.id,
+        image: newSubcategoryData.image.trim() || null
+      }]);
+
+    if (error) {
+      if (error.code === '23505') { // Unique constraint violation
+        toast({
+          title: "Subcategory exists",
+          description: "This subcategory already exists in the selected category",
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Error adding subcategory",
+          description: error.message,
+          variant: "destructive",
+        });
+      }
+      return;
+    }
     
     toast({
       title: "Subcategory added",
       description: `Subcategory "${newSubcategoryData.subcategory.trim()}" has been added to "${newSubcategoryData.category}"`,
     });
     
-    setNewSubcategoryData({ category: '', subcategory: '' });
+    setNewSubcategoryData({ category: '', subcategory: '', image: '' });
     setIsSubcategoryModalOpen(false);
+    loadSubcategories();
   };
 
   const openAddModal = () => {
@@ -950,7 +939,7 @@ const Admin = () => {
                       <SelectValue placeholder="Select category" />
                     </SelectTrigger>
                     <SelectContent>
-                      {dynamicMainCategories.map((category) => (
+                      {mainCategories.map((category) => (
                         <SelectItem key={category} value={category}>
                           {category}
                         </SelectItem>
@@ -1184,9 +1173,18 @@ const Admin = () => {
                 <Label htmlFor="categoryName">Category Name *</Label>
                 <Input
                   id="categoryName"
-                  value={newCategoryName}
-                  onChange={(e) => setNewCategoryName(e.target.value)}
+                  value={newCategoryData.name}
+                  onChange={(e) => setNewCategoryData({ ...newCategoryData, name: e.target.value })}
                   placeholder="Enter category name"
+                />
+              </div>
+              <div>
+                <Label htmlFor="categoryImage">Category Image URL (optional)</Label>
+                <Input
+                  id="categoryImage"
+                  value={newCategoryData.image}
+                  onChange={(e) => setNewCategoryData({ ...newCategoryData, image: e.target.value })}
+                  placeholder="Enter image URL"
                 />
               </div>
             </div>
@@ -1194,7 +1192,7 @@ const Admin = () => {
             <DialogFooter>
               <Button variant="outline" onClick={() => {
                 setIsCategoryModalOpen(false);
-                setNewCategoryName('');
+                setNewCategoryData({ name: '', image: '' });
               }}>
                 Cancel
               </Button>
@@ -1229,7 +1227,7 @@ const Admin = () => {
                     <SelectValue placeholder="Select a category" />
                   </SelectTrigger>
                   <SelectContent>
-                    {dynamicMainCategories.map((category) => (
+                    {mainCategories.map((category) => (
                       <SelectItem key={category} value={category}>
                         {category}
                       </SelectItem>
@@ -1250,12 +1248,25 @@ const Admin = () => {
                   placeholder="Enter subcategory name"
                 />
               </div>
+              
+              <div>
+                <Label htmlFor="subcategoryImage">Subcategory Image URL (optional)</Label>
+                <Input
+                  id="subcategoryImage"
+                  value={newSubcategoryData.image}
+                  onChange={(e) => setNewSubcategoryData({
+                    ...newSubcategoryData,
+                    image: e.target.value
+                  })}
+                  placeholder="Enter image URL"
+                />
+              </div>
             </div>
             
             <DialogFooter>
               <Button variant="outline" onClick={() => {
                 setIsSubcategoryModalOpen(false);
-                setNewSubcategoryData({ category: '', subcategory: '' });
+                setNewSubcategoryData({ category: '', subcategory: '', image: '' });
               }}>
                 Cancel
               </Button>
