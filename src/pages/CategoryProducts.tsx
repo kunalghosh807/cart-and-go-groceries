@@ -15,9 +15,13 @@ const CategoryProducts = () => {
   const { getProductsByCategory, loading } = useProducts();
   
   const category = categories.find(cat => cat.id === categoryId);
-  const products = category ? getProductsByCategory(category.name) : [];
+  // Convert category ID back to name for database lookup
+  const categoryName = categoryId?.split('-').map(word => 
+    word.charAt(0).toUpperCase() + word.slice(1)
+  ).join(' ') || '';
+  const products = getProductsByCategory(categoryName);
   
-  if (!category) {
+  if (!categoryName) {
     return (
       <div className="min-h-screen bg-background">
         <Navbar />
@@ -25,7 +29,7 @@ const CategoryProducts = () => {
           <div className="text-center">
             <h1 className="text-2xl font-bold text-foreground">Category not found</h1>
             <Button onClick={() => navigate(-1)} className="mt-4">
-              Back to Categories
+              Back to Home
             </Button>
           </div>
         </main>
@@ -52,8 +56,8 @@ const CategoryProducts = () => {
         </div>
         
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-foreground mb-4">{category.name}</h1>
-          <p className="text-muted-foreground">{category.productCount} products available</p>
+          <h1 className="text-3xl font-bold text-foreground mb-4">{categoryName}</h1>
+          <p className="text-muted-foreground">{products.length} products available</p>
         </div>
         
         {loading ? (
