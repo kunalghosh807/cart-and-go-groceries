@@ -11,24 +11,7 @@ import { categories } from '@/data/mockData';
 import { useProducts } from '@/hooks/useProducts';
 
 const Index = () => {
-  const { featuredProducts, dealProducts, loading, products } = useProducts();
-
-  // Create categories from actual database products
-  const realCategories = React.useMemo(() => {
-    const categoryMap = new Map();
-    products.forEach(product => {
-      if (!categoryMap.has(product.category)) {
-        categoryMap.set(product.category, {
-          id: product.category.toLowerCase().replace(/\s+/g, '-'),
-          name: product.category,
-          image: product.image, // Use first product's image as category image
-          productCount: 0
-        });
-      }
-      categoryMap.get(product.category).productCount++;
-    });
-    return Array.from(categoryMap.values());
-  }, [products]);
+  const { featuredProducts, dealProducts, loading } = useProducts();
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -47,7 +30,7 @@ const Index = () => {
               </Button>
             </div>
             <div className="grid grid-cols-4 gap-3">
-              {realCategories.slice(0, 8).map((category) => (
+              {categories.slice(0, 8).map((category) => (
                 <CategoryCard 
                   key={category.id}
                   id={category.id}
@@ -89,7 +72,7 @@ const Index = () => {
               </Button>
             </div>
             <div className="grid grid-cols-4 gap-3">
-              {realCategories.slice(0, 8).map((category) => (
+              {categories.slice(8, 16).map((category) => (
                 <CategoryCard 
                   key={category.id}
                   id={category.id}
@@ -110,7 +93,7 @@ const Index = () => {
               </Button>
             </div>
             <div className="grid grid-cols-4 gap-3">
-              {realCategories.slice(0, 8).map((category) => (
+              {categories.slice(16, 24).map((category) => (
                 <CategoryCard 
                   key={category.id}
                   id={category.id}
