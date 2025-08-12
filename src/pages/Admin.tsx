@@ -21,9 +21,9 @@ import {
   Plus, 
   ImageIcon, 
   DollarSign,
-  MoreHorizontal,
   ArrowUpDown,
-  Filter
+  Filter,
+  MoreHorizontal
 } from 'lucide-react';
 import { 
   Dialog, 
@@ -46,19 +46,19 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuTrigger,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-} from '@/components/ui/dropdown-menu';
-import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+} from '@/components/ui/dropdown-menu';
 import {
   Table,
   TableBody,
