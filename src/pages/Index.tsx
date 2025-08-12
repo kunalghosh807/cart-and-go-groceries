@@ -11,7 +11,7 @@ import { categories } from '@/data/mockData';
 import { useProducts } from '@/hooks/useProducts';
 
 const Index = () => {
-  const { featuredProducts, dealProducts, loading } = useProducts();
+  const { featuredProducts, dealProducts, loading, getProductsByCategory } = useProducts();
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -71,16 +71,19 @@ const Index = () => {
                 View All <ChevronRight className="h-4 w-4 ml-1" />
               </Button>
             </div>
-            <div className="grid grid-cols-4 gap-3">
-              {categories.slice(8, 16).map((category) => (
-                <CategoryCard 
-                  key={category.id}
-                  id={category.id}
-                  name={category.name} 
-                  image={category.image} 
-                  productCount={category.productCount} 
-                />
-              ))}
+            <div className="flex gap-3 overflow-x-auto pb-4 scrollbar-hide">
+              {loading ? (
+                <div className="text-muted-foreground">Loading products...</div>
+              ) : (
+                getProductsByCategory("Snacks & Drinks").map((product) => (
+                  <div key={product.id} className="flex-none">
+                    <ProductCard product={product} />
+                  </div>
+                ))
+              )}
+              {!loading && getProductsByCategory("Snacks & Drinks").length === 0 && (
+                <div className="text-muted-foreground">No products available in this category yet.</div>
+              )}
             </div>
           </section>
           
