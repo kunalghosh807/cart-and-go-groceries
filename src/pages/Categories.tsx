@@ -2,9 +2,11 @@ import React from 'react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import CategoryCard from '@/components/CategoryCard';
-import { categories } from '@/data/mockData';
+import { useCategories } from '@/hooks/useCategories';
 
 const Categories = () => {
+  const { subcategories, loading } = useCategories();
+
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
@@ -16,15 +18,19 @@ const Categories = () => {
         </div>
         
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-          {categories.map((category) => (
-            <CategoryCard
-              key={category.id}
-              id={category.id}
-              name={category.name}
-              image={category.image}
-              productCount={category.productCount}
-            />
-          ))}
+          {loading ? (
+            <div className="text-muted-foreground">Loading categories...</div>
+          ) : (
+            subcategories.map((subcategory) => (
+              <CategoryCard
+                key={subcategory.id}
+                id={subcategory.name.toLowerCase().replace(/\s+/g, '-')}
+                name={subcategory.name}
+                image={subcategory.image || "https://images.unsplash.com/photo-1610832958506-aa56368176cf?q=80&w=500&auto=format&fit=crop"}
+                productCount={0}
+              />
+            ))
+          )}
         </div>
       </main>
       
