@@ -105,6 +105,8 @@ const Admin = () => {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isPriceModalOpen, setIsPriceModalOpen] = useState(false);
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
+  const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
+  const [isSubcategoryModalOpen, setIsSubcategoryModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   
   const [formData, setFormData] = useState({
@@ -130,6 +132,56 @@ const Admin = () => {
     productId: '',
     currentImage: '',
     newImage: ''
+  });
+
+  const [newCategoryName, setNewCategoryName] = useState('');
+  const [newSubcategoryData, setNewSubcategoryData] = useState({
+    category: '',
+    subcategory: ''
+  });
+
+  // Dynamic categories and subcategories state
+  const [dynamicMainCategories, setDynamicMainCategories] = useState([
+    'Grocerry & Kitchen',
+    'Featured Products', 
+    'Snacks & Drinks',
+    'Beauty & Personal Care',
+    "Today's Deals"
+  ]);
+
+  const [dynamicSubcategoriesByCategory, setDynamicSubcategoriesByCategory] = useState({
+    'Grocerry & Kitchen': [
+      'Vegetables & Fruits',
+      'Atta, Rice & Dal', 
+      'Oil, Ghee & Masala',
+      'Dairy, Bread & Eggs',
+      'Bakery & Biscuits',
+      'Dry Fruits & Cereals',
+      'Chicken, Meat & Fish',
+      'Kitchenware & Appliances'
+    ],
+    'Snacks & Drinks': [
+      'Chips & Namkeen',
+      'Sweets & Chocolates',
+      'Drinks & Juices', 
+      'Tea, Coffee & Milk Drinks',
+      'Instant Food',
+      'Sauces & Spreads',
+      'Paan Corner',
+      'Cakes'
+    ],
+    'Beauty & Personal Care': [
+      'Bath & Body',
+      'Hair',
+      'Skin & Face',
+      'Beauty & Cosmetics',
+      'Feminine Hygiene',
+      'Baby Care',
+      'Health & Pharma',
+      'Sexual Wellness'
+    ],
+    'Featured Products': [],
+    "Today's Deals": []
   });
 
   useEffect(() => {
@@ -270,9 +322,82 @@ const Admin = () => {
     "Today's Deals": []
   };
 
-  // Get subcategories for selected category
+  // Get subcategories for selected category using dynamic data
   const getSubcategoriesForCategory = (category: string) => {
-    return subcategoriesByCategory[category] || [];
+    return dynamicSubcategoriesByCategory[category] || [];
+  };
+
+  // Add new category
+  const addCategory = () => {
+    if (!newCategoryName.trim()) {
+      toast({
+        title: "Invalid category name",
+        description: "Please enter a valid category name",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (dynamicMainCategories.includes(newCategoryName.trim())) {
+      toast({
+        title: "Category exists",
+        description: "This category already exists",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setDynamicMainCategories([...dynamicMainCategories, newCategoryName.trim()]);
+    setDynamicSubcategoriesByCategory({
+      ...dynamicSubcategoriesByCategory,
+      [newCategoryName.trim()]: []
+    });
+    
+    toast({
+      title: "Category added",
+      description: `Category "${newCategoryName.trim()}" has been added successfully`,
+    });
+    
+    setNewCategoryName('');
+    setIsCategoryModalOpen(false);
+  };
+
+  // Add new subcategory
+  const addSubcategory = () => {
+    if (!newSubcategoryData.category || !newSubcategoryData.subcategory.trim()) {
+      toast({
+        title: "Invalid data",
+        description: "Please select a category and enter a subcategory name",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const existingSubcategories = dynamicSubcategoriesByCategory[newSubcategoryData.category] || [];
+    if (existingSubcategories.includes(newSubcategoryData.subcategory.trim())) {
+      toast({
+        title: "Subcategory exists",
+        description: "This subcategory already exists in the selected category",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setDynamicSubcategoriesByCategory({
+      ...dynamicSubcategoriesByCategory,
+      [newSubcategoryData.category]: [
+        ...existingSubcategories,
+        newSubcategoryData.subcategory.trim()
+      ]
+    });
+    
+    toast({
+      title: "Subcategory added",
+      description: `Subcategory "${newSubcategoryData.subcategory.trim()}" has been added to "${newSubcategoryData.category}"`,
+    });
+    
+    setNewSubcategoryData({ category: '', subcategory: '' });
+    setIsSubcategoryModalOpen(false);
   };
 
   const openAddModal = () => {
@@ -520,10 +645,28 @@ const Admin = () => {
       <div className="container mx-auto px-4 py-8">
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-3xl font-bold">Product Management</h1>
-          <Button onClick={openAddModal} className="flex items-center gap-2">
-            <Plus className="h-4 w-4" />
-            Add Product
-          </Button>
+          <div className="flex gap-3">
+            <Button 
+              onClick={() => setIsCategoryModalOpen(true)} 
+              variant="outline" 
+              className="flex items-center gap-2"
+            >
+              <Plus className="h-4 w-4" />
+              Add Category
+            </Button>
+            <Button 
+              onClick={() => setIsSubcategoryModalOpen(true)} 
+              variant="outline" 
+              className="flex items-center gap-2"
+            >
+              <Plus className="h-4 w-4" />
+              Add Sub Category
+            </Button>
+            <Button onClick={openAddModal} className="flex items-center gap-2">
+              <Plus className="h-4 w-4" />
+              Add Product
+            </Button>
+          </div>
         </div>
 
         {/* Filters and Search */}
@@ -807,7 +950,7 @@ const Admin = () => {
                       <SelectValue placeholder="Select category" />
                     </SelectTrigger>
                     <SelectContent>
-                      {mainCategories.map((category) => (
+                      {dynamicMainCategories.map((category) => (
                         <SelectItem key={category} value={category}>
                           {category}
                         </SelectItem>
@@ -1021,6 +1164,103 @@ const Admin = () => {
               </Button>
               <Button onClick={updateImage}>
                 Update Image
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Add Category Modal */}
+        <Dialog open={isCategoryModalOpen} onOpenChange={setIsCategoryModalOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Add New Category</DialogTitle>
+              <DialogDescription>
+                Add a new category to organize your products
+              </DialogDescription>
+            </DialogHeader>
+            
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="categoryName">Category Name *</Label>
+                <Input
+                  id="categoryName"
+                  value={newCategoryName}
+                  onChange={(e) => setNewCategoryName(e.target.value)}
+                  placeholder="Enter category name"
+                />
+              </div>
+            </div>
+            
+            <DialogFooter>
+              <Button variant="outline" onClick={() => {
+                setIsCategoryModalOpen(false);
+                setNewCategoryName('');
+              }}>
+                Cancel
+              </Button>
+              <Button onClick={addCategory}>
+                Add Category
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Add Subcategory Modal */}
+        <Dialog open={isSubcategoryModalOpen} onOpenChange={setIsSubcategoryModalOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Add New Subcategory</DialogTitle>
+              <DialogDescription>
+                Add a new subcategory to an existing category
+              </DialogDescription>
+            </DialogHeader>
+            
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="categorySelect">Select Category *</Label>
+                <Select
+                  value={newSubcategoryData.category}
+                  onValueChange={(value) => setNewSubcategoryData({
+                    ...newSubcategoryData,
+                    category: value
+                  })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {dynamicMainCategories.map((category) => (
+                      <SelectItem key={category} value={category}>
+                        {category}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <div>
+                <Label htmlFor="subcategoryName">Subcategory Name *</Label>
+                <Input
+                  id="subcategoryName"
+                  value={newSubcategoryData.subcategory}
+                  onChange={(e) => setNewSubcategoryData({
+                    ...newSubcategoryData,
+                    subcategory: e.target.value
+                  })}
+                  placeholder="Enter subcategory name"
+                />
+              </div>
+            </div>
+            
+            <DialogFooter>
+              <Button variant="outline" onClick={() => {
+                setIsSubcategoryModalOpen(false);
+                setNewSubcategoryData({ category: '', subcategory: '' });
+              }}>
+                Cancel
+              </Button>
+              <Button onClick={addSubcategory}>
+                Add Subcategory
               </Button>
             </DialogFooter>
           </DialogContent>
