@@ -226,6 +226,55 @@ const Admin = () => {
     setEditingProduct(null);
   };
 
+  // Define main categories and their subcategories
+  const mainCategories = [
+    'Grocerry & Kitchen',
+    'Featured Products', 
+    'Snacks & Drinks',
+    'Beauty & Personal Care',
+    "Today's Deals"
+  ];
+
+  const subcategoriesByCategory = {
+    'Grocerry & Kitchen': [
+      'Vegetables & Fruits',
+      'Atta, Rice & Dal', 
+      'Oil, Ghee & Masala',
+      'Dairy, Bread & Eggs',
+      'Bakery & Biscuits',
+      'Dry Fruits & Cereals',
+      'Chicken, Meat & Fish',
+      'Kitchenware & Appliances'
+    ],
+    'Snacks & Drinks': [
+      'Chips & Namkeen',
+      'Sweets & Chocolates',
+      'Drinks & Juices', 
+      'Tea, Coffee & Milk Drinks',
+      'Instant Food',
+      'Sauces & Spreads',
+      'Paan Corner',
+      'Cakes'
+    ],
+    'Beauty & Personal Care': [
+      'Bath & Body',
+      'Hair',
+      'Skin & Face',
+      'Beauty & Cosmetics',
+      'Feminine Hygiene',
+      'Baby Care',
+      'Health & Pharma',
+      'Sexual Wellness'
+    ],
+    'Featured Products': [],
+    "Today's Deals": []
+  };
+
+  // Get subcategories for selected category
+  const getSubcategoriesForCategory = (category: string) => {
+    return subcategoriesByCategory[category] || [];
+  };
+
   const openAddModal = () => {
     resetForm();
     setIsAddModalOpen(true);
@@ -749,14 +798,18 @@ const Admin = () => {
                 
                 <div>
                   <Label htmlFor="category">Category *</Label>
-                  <Select value={formData.category} onValueChange={(value) => setFormData({ ...formData, category: value })}>
+                  <Select value={formData.category} onValueChange={(value) => setFormData({ 
+                    ...formData, 
+                    category: value,
+                    subcategory: '' // Reset subcategory when category changes
+                  })}>
                     <SelectTrigger>
                       <SelectValue placeholder="Select category" />
                     </SelectTrigger>
                     <SelectContent>
-                      {categories.map((category) => (
-                        <SelectItem key={category.id} value={category.name}>
-                          {category.name}
+                      {mainCategories.map((category) => (
+                        <SelectItem key={category} value={category}>
+                          {category}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -799,11 +852,22 @@ const Admin = () => {
                 
                 <div>
                   <Label htmlFor="subcategory">Subcategory</Label>
-                  <Input
-                    id="subcategory"
+                  <Select
                     value={formData.subcategory}
-                    onChange={(e) => setFormData({ ...formData, subcategory: e.target.value })}
-                  />
+                    onValueChange={(value) => setFormData({ ...formData, subcategory: value })}
+                    disabled={!formData.category || getSubcategoriesForCategory(formData.category).length === 0}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select subcategory" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {getSubcategoriesForCategory(formData.category).map((subcategory) => (
+                        <SelectItem key={subcategory} value={subcategory}>
+                          {subcategory}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
                 
                 {formData.is_deal && (
