@@ -51,12 +51,24 @@ const CategoryProducts = () => {
           convertedName.split(' ').slice(0, 2).join(' ') // First two words
         ];
         
-        const categoryProducts = allProducts.filter(p => 
+        // First try to match by category
+        let categoryProducts = allProducts.filter(p => 
           possibleNames.some(name => 
             p.category.toLowerCase().includes(name.toLowerCase()) ||
             name.toLowerCase().includes(p.category.toLowerCase())
           )
         );
+        
+        // If no products found by category, try to match by subcategory
+        if (categoryProducts.length === 0) {
+          categoryProducts = allProducts.filter(p => 
+            possibleNames.some(name => 
+              p.subcategory?.toLowerCase().includes(name.toLowerCase()) ||
+              name.toLowerCase().includes(p.subcategory?.toLowerCase() || '')
+            )
+          );
+        }
+        
         setProducts(categoryProducts);
       }
     };
