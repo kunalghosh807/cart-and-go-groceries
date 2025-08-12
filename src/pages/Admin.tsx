@@ -153,10 +153,22 @@ const Admin = () => {
       navigate('/auth');
       return;
     }
+    
+    // Check if user is admin (specific email address)
+    if (user.email !== 'kunalghosh807@yahoo.com') {
+      toast({
+        title: "Access Denied",
+        description: "You don't have permission to access the admin panel.",
+        variant: "destructive",
+      });
+      navigate('/');
+      return;
+    }
+    
     loadProducts();
     loadCategories();
     loadSubcategories();
-  }, [user, navigate]);
+  }, [user, navigate, toast]);
 
   const loadProducts = async () => {
     setLoading(true);
