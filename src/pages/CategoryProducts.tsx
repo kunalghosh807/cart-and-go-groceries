@@ -62,6 +62,7 @@ const CategoryProducts = () => {
         // If no products found by category, try to match by subcategory
         if (categoryProducts.length === 0) {
           categoryProducts = allProducts.filter(p => 
+            p.subcategory && // Only include products that actually have a subcategory
             possibleNames.some(name => 
               p.subcategory?.toLowerCase().includes(name.toLowerCase()) ||
               name.toLowerCase().includes(p.subcategory?.toLowerCase() || '')
