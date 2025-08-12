@@ -9,11 +9,9 @@ import { Button } from '@/components/ui/button';
 import { ChevronRight } from 'lucide-react';
 import { categories } from '@/data/mockData';
 import { useProducts } from '@/hooks/useProducts';
-import { useCategories } from '@/hooks/useCategories';
 
 const Index = () => {
   const { featuredProducts, dealProducts, loading } = useProducts();
-  const { categories: dbCategories, subcategories, loading: categoriesLoading, getSubcategoriesForCategory } = useCategories();
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -32,19 +30,15 @@ const Index = () => {
               </Button>
             </div>
             <div className="grid grid-cols-4 gap-3">
-              {categoriesLoading ? (
-                <div className="text-muted-foreground">Loading categories...</div>
-              ) : (
-                getSubcategoriesForCategory('Grocerry & Kitchen').slice(0, 8).map((subcategory) => (
-                  <CategoryCard 
-                    key={subcategory.id}
-                    id={subcategory.name.toLowerCase().replace(/\s+/g, '-')}
-                    name={subcategory.name} 
-                    image={subcategory.image || "https://images.unsplash.com/photo-1610832958506-aa56368176cf?q=80&w=500&auto=format&fit=crop"} 
-                    productCount={0} 
-                  />
-                ))
-              )}
+              {categories.slice(0, 8).map((category) => (
+                <CategoryCard 
+                  key={category.id}
+                  id={category.id}
+                  name={category.name} 
+                  image={category.image} 
+                  productCount={category.productCount} 
+                />
+              ))}
             </div>
           </section>
           
@@ -78,19 +72,15 @@ const Index = () => {
               </Button>
             </div>
             <div className="grid grid-cols-4 gap-3">
-              {categoriesLoading ? (
-                <div className="text-muted-foreground">Loading categories...</div>
-              ) : (
-                getSubcategoriesForCategory('Snacks & Drinks').slice(0, 8).map((subcategory) => (
-                  <CategoryCard 
-                    key={subcategory.id}
-                    id={subcategory.name.toLowerCase().replace(/\s+/g, '-')}
-                    name={subcategory.name} 
-                    image={subcategory.image || "https://images.unsplash.com/photo-1566478989037-eec170784d0b?q=80&w=500&auto=format&fit=crop"} 
-                    productCount={0} 
-                  />
-                ))
-              )}
+              {categories.slice(8, 16).map((category) => (
+                <CategoryCard 
+                  key={category.id}
+                  id={category.id}
+                  name={category.name} 
+                  image={category.image} 
+                  productCount={category.productCount} 
+                />
+              ))}
             </div>
           </section>
           
@@ -103,19 +93,15 @@ const Index = () => {
               </Button>
             </div>
             <div className="grid grid-cols-4 gap-3">
-              {categoriesLoading ? (
-                <div className="text-muted-foreground">Loading categories...</div>
-              ) : (
-                getSubcategoriesForCategory('Beauty & Personal Care').slice(0, 8).map((subcategory) => (
-                  <CategoryCard 
-                    key={subcategory.id}
-                    id={subcategory.name.toLowerCase().replace(/\s+/g, '-')}
-                    name={subcategory.name} 
-                    image={subcategory.image || "https://images.unsplash.com/photo-1556228578-626910bf4405?q=80&w=500&auto=format&fit=crop"} 
-                    productCount={0} 
-                  />
-                ))
-              )}
+              {categories.slice(16, 24).map((category) => (
+                <CategoryCard 
+                  key={category.id}
+                  id={category.id}
+                  name={category.name} 
+                  image={category.image} 
+                  productCount={category.productCount} 
+                />
+              ))}
             </div>
           </section>
           
