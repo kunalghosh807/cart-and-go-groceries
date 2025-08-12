@@ -13,7 +13,15 @@ import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
-import { Trash2, Edit, Package, ShoppingCart } from 'lucide-react';
+import { Trash2, Edit, Package, ShoppingCart, AlertTriangle, DollarSign } from 'lucide-react';
+import { 
+  Dialog, 
+  DialogContent, 
+  DialogDescription, 
+  DialogHeader, 
+  DialogTitle, 
+  DialogTrigger 
+} from '@/components/ui/dialog';
 
 interface Product {
   id: string;
@@ -49,6 +57,7 @@ const Admin = () => {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+  const [quickPriceUpdate, setQuickPriceUpdate] = useState<{productId: string, currentPrice: number} | null>(null);
   
   const [formData, setFormData] = useState({
     name: '',
@@ -228,6 +237,48 @@ const Admin = () => {
         description: "Order status updated successfully",
       });
       loadOrders();
+    }
+  };
+
+  const markOutOfStock = async (productId: string) => {
+    const { error } = await supabase
+      .from('products')
+      .update({ stock_quantity: 0 })
+      .eq('id', productId);
+
+    if (error) {
+      toast({
+        title: "Error updating stock",
+        description: error.message,
+        variant: "destructive",
+      });
+    } else {
+      toast({
+        title: "Product marked out of stock",
+        description: "Stock quantity set to 0",
+      });
+      loadProducts();
+    }
+  };
+
+  const quickUpdatePrice = async (productId: string, newPrice: number) => {
+    const { error } = await supabase
+      .from('products')
+      .update({ price: newPrice })
+      .eq('id', productId);
+
+    if (error) {
+      toast({
+        title: "Error updating price",
+        description: error.message,
+        variant: "destructive",
+      });
+    } else {
+      toast({
+        title: "Price updated",
+        description: "Product price updated successfully",
+      });
+      loadProducts();
     }
   };
 
@@ -411,10 +462,65 @@ const Admin = () => {
                         {product.is_featured && <Badge variant="secondary">Featured</Badge>}
                         {product.is_deal && <Badge variant="secondary">Deal</Badge>}
                       </div>
-                      <div className="flex gap-2">
+                      <div className="flex gap-1 flex-wrap">
                         <Button size="sm" variant="outline" onClick={() => editProduct(product)}>
                           <Edit className="h-3 w-3" />
                         </Button>
+                        
+                        <Dialog>
+                          <DialogTrigger asChild>
+                            <Button size="sm" variant="outline">
+                              <DollarSign className="h-3 w-3" />
+                            </Button>
+                          </DialogTrigger>
+                          <DialogContent>
+                            <DialogHeader>
+                              <DialogTitle>Update Price</DialogTitle>
+                              <DialogDescription>
+                                Update the price for {product.name}
+                              </DialogDescription>
+                            </DialogHeader>
+                            <div className="space-y-4">
+                              <div>
+                                <Label>Current Price: ₹{product.price}</Label>
+                                <Input
+                                  type="number"
+                                  step="0.01"
+                                  placeholder="New price"
+                                  onKeyDown={(e) => {
+                                    if (e.key === 'Enter') {
+                                      const newPrice = parseFloat((e.target as HTMLInputElement).value);
+                                      if (newPrice > 0) {
+                                        quickUpdatePrice(product.id, newPrice);
+                                      }
+                                    }
+                                  }}
+                                />
+                              </div>
+                              <Button 
+                                onClick={(e) => {
+                                  const input = e.currentTarget.parentElement?.querySelector('input');
+                                  const newPrice = parseFloat(input?.value || '0');
+                                  if (newPrice > 0) {
+                                    quickUpdatePrice(product.id, newPrice);
+                                  }
+                                }}
+                              >
+                                Update Price
+                              </Button>
+                            </div>
+                          </DialogContent>
+                        </Dialog>
+                        
+                        <Button 
+                          size="sm" 
+                          variant="secondary" 
+                          onClick={() => markOutOfStock(product.id)}
+                          disabled={product.stock_quantity === 0}
+                        >
+                          <AlertTriangle className="h-3 w-3" />
+                        </Button>
+                        
                         <Button 
                           size="sm" 
                           variant="destructive" 
