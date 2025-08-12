@@ -1,78 +1,73 @@
-import React from 'react';
-import { useParams } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import ProductCard from '@/components/ProductCard';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
 import { useProducts } from '@/hooks/useProducts';
 import { supabase } from '@/integrations/supabase/client';
-import { useState, useEffect } from 'react';
 
-const CategoryProducts = () => {
-  const { categoryId } = useParams();
+const SubcategoryProducts = () => {
+  const { categoryId, subcategoryId } = useParams();
   const navigate = useNavigate();
   const { products: allProducts, loading } = useProducts();
+  const [subcategoryName, setSubcategoryName] = useState<string>('');
   const [categoryName, setCategoryName] = useState<string>('');
   const [products, setProducts] = useState<any[]>([]);
 
   useEffect(() => {
-    const loadCategoryAndProducts = async () => {
-      if (!categoryId) return;
+    const loadSubcategoryAndProducts = async () => {
+      if (!subcategoryId) return;
 
-      // Try to find the category in the database first
-      const { data: dbCategories } = await supabase
-        .from('categories')
-        .select('*')
-        .eq('id', categoryId);
+      // Try to find the subcategory in the database
+      const { data: dbSubcategories } = await supabase
+        .from('subcategories')
+        .select(`
+          *,
+          categories (
+            id,
+            name
+          )
+        `)
+        .eq('id', subcategoryId);
 
-      if (dbCategories && dbCategories.length > 0) {
-        // Found in database - use the actual category name
-        const category = dbCategories[0];
-        setCategoryName(category.name);
-        // Filter products by this exact category name
-        const categoryProducts = allProducts.filter(p => 
-          p.category.toLowerCase() === category.name.toLowerCase()
+      if (dbSubcategories && dbSubcategories.length > 0) {
+        const subcategory = dbSubcategories[0];
+        setSubcategoryName(subcategory.name);
+        setCategoryName(subcategory.categories?.name || '');
+        
+        // Filter products by this exact subcategory name
+        const subcategoryProducts = allProducts.filter(p => 
+          p.subcategory?.toLowerCase() === subcategory.name.toLowerCase()
         );
-        setProducts(categoryProducts);
+        setProducts(subcategoryProducts);
       } else {
-        // Fallback to mock data conversion for existing routes
-        const convertedName = categoryId.split('-').map(word => 
+        // Fallback to converted name
+        const convertedName = subcategoryId.split('-').map(word => 
           word.charAt(0).toUpperCase() + word.slice(1)
         ).join(' ');
-        setCategoryName(convertedName);
+        setSubcategoryName(convertedName);
         
-        // Try multiple variations to match products
-        const possibleNames = [
-          convertedName,
-          convertedName.replace('&', 'and'),
-          convertedName.split(' ')[0], // First word only
-          convertedName.split(' ').slice(0, 2).join(' ') // First two words
-        ];
-        
-        const categoryProducts = allProducts.filter(p => 
-          possibleNames.some(name => 
-            p.category.toLowerCase().includes(name.toLowerCase()) ||
-            name.toLowerCase().includes(p.category.toLowerCase())
-          )
+        const subcategoryProducts = allProducts.filter(p => 
+          p.subcategory?.toLowerCase() === convertedName.toLowerCase()
         );
-        setProducts(categoryProducts);
+        setProducts(subcategoryProducts);
       }
     };
 
-    loadCategoryAndProducts();
-  }, [categoryId, allProducts]);
+    loadSubcategoryAndProducts();
+  }, [subcategoryId, allProducts]);
   
-  if (!categoryId) {
+  if (!subcategoryId) {
     return (
       <div className="min-h-screen bg-background">
         <Navbar />
         <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="text-center">
-            <h1 className="text-2xl font-bold text-foreground">Category not found</h1>
+            <h1 className="text-2xl font-bold text-foreground">Subcategory not found</h1>
             <Button onClick={() => navigate(-1)} className="mt-4">
-              Back to Home
+              Back
             </Button>
           </div>
         </main>
@@ -99,7 +94,10 @@ const CategoryProducts = () => {
         </div>
         
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-foreground mb-4">{categoryName}</h1>
+          <div className="text-sm text-muted-foreground mb-2">
+            {categoryName && `${categoryName} > `}
+          </div>
+          <h1 className="text-3xl font-bold text-foreground mb-4">{subcategoryName}</h1>
           <p className="text-muted-foreground">{products.length} products available</p>
         </div>
         
@@ -116,7 +114,7 @@ const CategoryProducts = () => {
         ) : (
           <div className="text-center py-12">
             <h2 className="text-xl font-semibold text-foreground mb-2">Coming Soon!</h2>
-            <p className="text-muted-foreground">Products for this category will be available soon.</p>
+            <p className="text-muted-foreground">Products for this subcategory will be available soon.</p>
           </div>
         )}
       </main>
@@ -126,4 +124,4 @@ const CategoryProducts = () => {
   );
 };
 
-export default CategoryProducts;
+export default SubcategoryProducts;
