@@ -5,15 +5,17 @@ import Footer from '@/components/Footer';
 import ProductCard from '@/components/ProductCard';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
-import { categories, categoryProducts } from '@/data/mockData';
+import { categories } from '@/data/mockData';
 import { useNavigate } from 'react-router-dom';
+import { useProducts } from '@/hooks/useProducts';
 
 const CategoryProducts = () => {
   const { categoryId } = useParams();
   const navigate = useNavigate();
+  const { getProductsByCategory, loading } = useProducts();
   
   const category = categories.find(cat => cat.id === categoryId);
-  const products = categoryProducts[categoryId as keyof typeof categoryProducts] || [];
+  const products = category ? getProductsByCategory(category.name) : [];
   
   if (!category) {
     return (
@@ -54,7 +56,11 @@ const CategoryProducts = () => {
           <p className="text-muted-foreground">{category.productCount} products available</p>
         </div>
         
-        {products.length > 0 ? (
+        {loading ? (
+          <div className="text-center py-12">
+            <p className="text-muted-foreground text-lg">Loading products...</p>
+          </div>
+        ) : products.length > 0 ? (
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
             {products.map((product) => (
               <ProductCard key={product.id} product={product} />

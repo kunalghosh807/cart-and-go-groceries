@@ -7,11 +7,11 @@ import CategoryCard from '@/components/CategoryCard';
 import Footer from '@/components/Footer';
 import { Button } from '@/components/ui/button';
 import { ChevronRight } from 'lucide-react';
-import { featuredProducts, dealProducts, categories } from '@/data/mockData';
-import { useCart } from '@/hooks/useCart';
+import { categories } from '@/data/mockData';
+import { useProducts } from '@/hooks/useProducts';
 
 const Index = () => {
-  const { addToCart } = useCart();
+  const { featuredProducts, dealProducts, loading } = useProducts();
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -51,11 +51,15 @@ const Index = () => {
               </Button>
             </div>
             <div className="flex gap-3 overflow-x-auto pb-4 scrollbar-hide">
-              {featuredProducts.map((product) => (
-                <div key={product.id} className="flex-none">
-                  <ProductCard product={product} />
-                </div>
-              ))}
+              {loading ? (
+                <div className="text-muted-foreground">Loading products...</div>
+              ) : (
+                featuredProducts.map((product) => (
+                  <div key={product.id} className="flex-none">
+                    <ProductCard product={product} />
+                  </div>
+                ))
+              )}
             </div>
           </section>
           
@@ -110,11 +114,15 @@ const Index = () => {
               </Button>
             </div>
             <div className="flex gap-3 overflow-x-auto pb-4 scrollbar-hide">
-              {dealProducts.map((product) => (
-                <div key={product.id} className="flex-none">
-                  <ProductCard product={product} />
-                </div>
-              ))}
+              {loading ? (
+                <div className="text-muted-foreground">Loading deals...</div>
+              ) : (
+                dealProducts.map((product) => (
+                  <div key={product.id} className="flex-none">
+                    <ProductCard product={product} />
+                  </div>
+                ))
+              )}
             </div>
           </section>
           
