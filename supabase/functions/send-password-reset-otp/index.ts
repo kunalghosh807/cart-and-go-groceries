@@ -80,9 +80,13 @@ const handler = async (req: Request): Promise<Response> => {
       console.log("Attempting to send email to:", email);
       console.log("Using OTP:", otpCode);
       
+      // For testing: Use your verified email address
+      const testEmail = "kunalghosh8099@gmail.com"; // Your verified Resend email
+      console.log("⚠️ Using test email address:", testEmail, "(Original:", email, ")");
+      
       const emailResponse = await resend.emails.send({
         from: "Shopzo <onboarding@resend.dev>",
-        to: [email],
+        to: [testEmail], // Using your verified email for testing
         subject: "Password Reset Code - Shopzo",
         html: `
           <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
