@@ -97,6 +97,12 @@ const Auth = () => {
       
       console.log("OTP send response:", { data, error });
       
+      // Show the OTP in console for testing
+      if (data?.debug_otp) {
+        console.log("🔑 TEST OTP CODE:", data.debug_otp);
+        console.log("Use this OTP to verify →", data.debug_otp);
+      }
+      
       if (error) {
         console.error("Failed to send OTP:", error);
         throw error;
@@ -280,6 +286,9 @@ const Auth = () => {
                 <p className="text-sm text-gray-600 mb-4">
                   We've sent a 6-digit verification code to {email}
                 </p>
+                <p className="text-xs text-green-600 mb-4">
+                  For testing: Use OTP from browser console (F12 → Console)
+                </p>
               </div>
               <div className="flex justify-center">
                 <InputOTP
@@ -302,12 +311,13 @@ const Auth = () => {
                 className="w-full"
                 disabled={loading || otp.length !== 6}
               >
-                Verify Code
+                {loading ? 'Verifying...' : 'Verify Code'}
               </Button>
               <div className="text-center space-y-2">
                 <button
                   type="button"
                   onClick={() => {
+                    console.log("Resend Code clicked");
                     setShowOtpVerification(false);
                     setShowForgotPassword(true);
                     setOtp('');
