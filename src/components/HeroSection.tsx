@@ -7,7 +7,6 @@ import banner1 from '@/assets/banner-1.jpg';
 import banner2 from '@/assets/banner-2.jpg';
 import banner3 from '@/assets/banner-3.jpg';
 import banner4 from '@/assets/banner-4.jpg';
-import Autoplay from 'embla-carousel-autoplay';
 
 const banners = [
   {
@@ -36,14 +35,6 @@ const HeroSection = () => {
   const [api, setApi] = useState<CarouselApi>();
   const [current, setCurrent] = useState(0);
 
-  const autoplayPlugin = useCallback(() => 
-    Autoplay({ 
-      delay: 4000,
-      stopOnInteraction: false,
-      rootNode: (emblaRoot) => emblaRoot.parentElement,
-    }), []
-  );
-
   useEffect(() => {
     if (!api) return;
 
@@ -61,7 +52,6 @@ const HeroSection = () => {
       <Carousel 
         setApi={setApi}
         className="w-full h-full"
-        plugins={[autoplayPlugin()]}
         opts={{
           align: "start",
           loop: true,

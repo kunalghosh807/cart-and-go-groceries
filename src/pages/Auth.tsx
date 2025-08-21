@@ -38,9 +38,12 @@ const Auth = () => {
     setLoading(true);
 
     try {
+      // Normalize email to lowercase
+      const normalizedEmail = email.toLowerCase().trim();
+      
       if (isLogin) {
         const { error } = await supabase.auth.signInWithPassword({
-          email,
+          email: normalizedEmail,
           password,
         });
         if (error) throw error;
@@ -51,37 +54,95 @@ const Auth = () => {
         });
         navigate('/');
       } else {
+        // Signup with comprehensive validation
         const { error } = await supabase.auth.signUp({
-          email,
+          email: normalizedEmail,
           password,
           options: {
             emailRedirectTo: `${window.location.origin}/`
           }
         });
+        
         if (error) {
-          // Check if the error is due to email already being registered
-          if (error.message.toLowerCase().includes('user already registered') || 
-              error.message.toLowerCase().includes('email already registered') ||
-              error.message.toLowerCase().includes('already been registered')) {
+          const errorMessage = error.message.toLowerCase();
+          
+          // Check for existing user errors (comprehensive patterns)
+          if (errorMessage.includes('user already registered') || 
+              errorMessage.includes('email already registered') ||
+              errorMessage.includes('already been registered') ||
+              errorMessage.includes('user with this email already registered') ||
+              errorMessage.includes('email address is already registered') ||
+              errorMessage.includes('account with this email already exists') ||
+              errorMessage.includes('duplicate') ||
+              (error.status === 422 && errorMessage.includes('email'))) {
+            
             toast({
               title: "Account Already Exists",
               description: "An account with this email already exists. Please sign in instead.",
               variant: "destructive",
             });
+            
+            // Auto-switch to login mode and populate email
+            setIsLogin(true);
+            setEmail(normalizedEmail);
             return;
           }
+          
+          // Handle password validation errors
+          if (errorMessage.includes('password') && 
+              (errorMessage.includes('weak') || errorMessage.includes('short') || errorMessage.includes('6 characters'))) {
+            toast({
+              title: "Password Too Weak",
+              description: "Password must be at least 6 characters long with a mix of letters and numbers.",
+              variant: "destructive",
+            });
+            return;
+          }
+          
+          // Handle invalid email format
+          if (errorMessage.includes('invalid email') || errorMessage.includes('email format')) {
+            toast({
+              title: "Invalid Email",
+              description: "Please enter a valid email address.",
+              variant: "destructive",
+            });
+            return;
+          }
+          
+          // Handle rate limiting
+          if (errorMessage.includes('rate limit') || errorMessage.includes('too many')) {
+            toast({
+              title: "Too Many Attempts",
+              description: "Please wait a moment before trying again.",
+              variant: "destructive",
+            });
+            return;
+          }
+          
           throw error;
         }
         
         toast({
-          title: "Account created!",
-          description: "Please check your email to verify your account.",
+          title: "Account Created Successfully!",
+          description: "Please check your email to verify your account before signing in.",
         });
       }
     } catch (error: any) {
+      // Fallback error handling
+      let errorTitle = "Authentication Error";
+      let errorDescription = error.message;
+      
+      if (error.message?.toLowerCase().includes('network')) {
+        errorTitle = "Network Error";
+        errorDescription = "Please check your internet connection and try again.";
+      } else if (error.message?.toLowerCase().includes('invalid login')) {
+        errorTitle = "Invalid Credentials";
+        errorDescription = "Please check your email and password.";
+      }
+      
       toast({
-        title: "Authentication Error",
-        description: error.message,
+        title: errorTitle,
+        description: errorDescription,
         variant: "destructive",
       });
     } finally {
