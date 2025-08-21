@@ -21,11 +21,22 @@ const CategoryProducts = () => {
     const loadCategoryAndProducts = async () => {
       if (!categoryId) return;
 
-      // Try to find the category in the database first
+      // Convert categoryId slug to category name first
+      const convertedName = categoryId.split('-').map(word => 
+        word.charAt(0).toUpperCase() + word.slice(1)
+      ).join(' ');
+      
+      // Handle special cases for category name conversion
+      let categoryNameToQuery = convertedName;
+      if (categoryId === 'vegetables-fruits') {
+        categoryNameToQuery = 'Vegetables & Fruits';
+      }
+      
+      // Try to find the category in the database by name
       const { data: dbCategories } = await supabase
         .from('categories')
         .select('*')
-        .eq('id', categoryId);
+        .eq('name', categoryNameToQuery);
 
       if (dbCategories && dbCategories.length > 0) {
         // Found in database - use the actual category name
@@ -38,9 +49,6 @@ const CategoryProducts = () => {
         setProducts(categoryProducts);
       } else {
         // Fallback to mock data conversion for existing routes
-        const convertedName = categoryId.split('-').map(word => 
-          word.charAt(0).toUpperCase() + word.slice(1)
-        ).join(' ');
         setCategoryName(convertedName);
         
         // Try multiple variations to match products
