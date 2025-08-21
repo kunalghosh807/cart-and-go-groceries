@@ -42,9 +42,15 @@ const handler = async (req: Request): Promise<Response> => {
       .gt('expires_at', new Date().toISOString())
       .order('created_at', { ascending: false })
       .limit(1)
-      .single();
+      .maybeSingle();
 
-    if (otpError || !otpData) {
+    if (otpError) {
+      console.log("Database error during OTP verification:", otpError);
+      throw new Error("Database error occurred");
+    }
+
+    if (!otpData) {
+      console.log("OTP verification failed - no matching OTP found");
       throw new Error("Invalid or expired OTP");
     }
 
