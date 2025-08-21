@@ -89,22 +89,30 @@ const Auth = () => {
 
     setLoading(true);
     try {
+      console.log("Sending OTP to:", email);
+      
       const { data, error } = await supabase.functions.invoke('send-password-reset-otp', {
         body: { email }
       });
       
-      if (error) throw error;
+      console.log("OTP send response:", { data, error });
+      
+      if (error) {
+        console.error("Failed to send OTP:", error);
+        throw error;
+      }
       
       toast({
         title: "OTP Sent!",
-        description: "Check your email for the 6-digit verification code.",
+        description: "Check your email for the 6-digit verification code. Check spam folder if not found.",
       });
       setShowForgotPassword(false);
       setShowOtpVerification(true);
     } catch (error: any) {
+      console.error("Send OTP error:", error);
       toast({
         title: "Error",
-        description: error.message || "Failed to send OTP",
+        description: error.message || "Failed to send OTP. Please check your email and try again.",
         variant: "destructive",
       });
     } finally {
@@ -125,25 +133,38 @@ const Auth = () => {
 
     setLoading(true);
     try {
+      console.log("Verifying OTP:", otp, "for email:", email);
+      
       // Verify OTP with backend before proceeding
-      const { error } = await supabase.functions.invoke('verify-otp', {
+      const { data, error } = await supabase.functions.invoke('verify-otp', {
         body: { 
           email: email.toLowerCase(),
           otp
         }
       });
       
+      console.log("OTP verification response:", { data, error });
+      
       if (error) {
+        console.error("OTP verification failed:", error);
         throw new Error("Invalid or expired OTP");
       }
+      
+      if (!data?.success) {
+        console.error("OTP verification returned false");
+        throw new Error("Invalid or expired OTP");
+      }
+      
+      console.log("OTP verified successfully, proceeding to password reset");
       
       // OTP is valid, proceed to password reset
       setShowOtpVerification(false);
       setShowNewPassword(true);
     } catch (error: any) {
+      console.error("OTP verification error:", error);
       toast({
         title: "Invalid OTP",
-        description: "The verification code is invalid or has expired.",
+        description: "The verification code is invalid or has expired. Please try again.",
         variant: "destructive",
       });
     } finally {
