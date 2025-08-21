@@ -66,8 +66,19 @@ const handler = async (req: Request): Promise<Response> => {
     console.log("OTP stored in database successfully");
 
     // Send email with Resend
+    const resendApiKey = Deno.env.get("RESEND_API_KEY");
+    console.log("Resend API Key available:", !!resendApiKey);
+    
+    if (!resendApiKey) {
+      console.error("RESEND_API_KEY is not configured");
+      throw new Error("Email service not configured");
+    }
+    
     try {
-      const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
+      const resend = new Resend(resendApiKey);
+      
+      console.log("Attempting to send email to:", email);
+      console.log("Using OTP:", otpCode);
       
       const emailResponse = await resend.emails.send({
         from: "Shopzo <onboarding@resend.dev>",
@@ -88,10 +99,19 @@ const handler = async (req: Request): Promise<Response> => {
         `,
       });
 
-      console.log("Email sent successfully:", emailResponse);
-    } catch (emailError) {
-      console.error("Failed to send email:", emailError);
-      // Still continue - OTP is stored and can be used for testing
+      console.log("✅ Email sent successfully:", JSON.stringify(emailResponse, null, 2));
+      
+      if (emailResponse.error) {
+        console.error("❌ Resend returned error:", emailResponse.error);
+        throw new Error(`Email sending failed: ${emailResponse.error}`);
+      }
+      
+    } catch (emailError: any) {
+      console.error("❌ Failed to send email:", emailError);
+      console.error("Error details:", JSON.stringify(emailError, null, 2));
+      
+      // Don't fail the entire request - OTP is still valid for testing
+      console.log("⚠️ Email failed but OTP is stored for testing");
     }
 
     // For testing: Return the OTP in response (REMOVE THIS IN PRODUCTION)
