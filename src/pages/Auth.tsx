@@ -123,8 +123,32 @@ const Auth = () => {
       return;
     }
 
-    setShowOtpVerification(false);
-    setShowNewPassword(true);
+    setLoading(true);
+    try {
+      // Verify OTP with backend before proceeding
+      const { error } = await supabase.functions.invoke('verify-otp', {
+        body: { 
+          email: email.toLowerCase(),
+          otp
+        }
+      });
+      
+      if (error) {
+        throw new Error("Invalid or expired OTP");
+      }
+      
+      // OTP is valid, proceed to password reset
+      setShowOtpVerification(false);
+      setShowNewPassword(true);
+    } catch (error: any) {
+      toast({
+        title: "Invalid OTP",
+        description: "The verification code is invalid or has expired.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handlePasswordReset = async (e: React.FormEvent) => {

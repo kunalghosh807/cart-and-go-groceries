@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.52.0';
+import { Resend } from "npm:resend@2.0.0";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -64,15 +65,42 @@ const handler = async (req: Request): Promise<Response> => {
 
     console.log("OTP stored in database successfully");
 
-    // For now, let's just return success without sending email to test the flow
-    // We'll add email sending back once the basic flow works
-    console.log("OTP would be:", otpCode);
+    // Initialize Resend and send email
+    const resend = new Resend(resendApiKey);
+    
+    const emailResponse = await resend.emails.send({
+      from: "Shopzo <onboarding@resend.dev>",
+      to: [email],
+      subject: "Password Reset OTP - Shopzo",
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+          <h1 style="color: #333; text-align: center; margin-bottom: 30px;">Password Reset Request</h1>
+          <p style="color: #666; font-size: 16px; line-height: 1.5;">Hello,</p>
+          <p style="color: #666; font-size: 16px; line-height: 1.5;">
+            We received a request to reset your password for your Shopzo account. 
+            Use the following OTP to verify your identity:
+          </p>
+          <div style="text-align: center; margin: 30px 0;">
+            <div style="display: inline-block; background-color: #f4f4f4; padding: 20px 30px; border-radius: 8px; font-size: 32px; font-weight: bold; letter-spacing: 8px; color: #333;">
+              ${otpCode}
+            </div>
+          </div>
+          <p style="color: #666; font-size: 16px; line-height: 1.5;">
+            This OTP will expire in 10 minutes. If you didn't request a password reset, please ignore this email.
+          </p>
+          <p style="color: #666; font-size: 14px; line-height: 1.5; margin-top: 30px;">
+            Best regards,<br>
+            The Shopzo Team
+          </p>
+        </div>
+      `,
+    });
+
+    console.log("Email sent successfully:", emailResponse);
 
     return new Response(JSON.stringify({ 
       success: true, 
-      message: "OTP sent successfully",
-      // Remove this in production - only for testing
-      otp: otpCode
+      message: "OTP sent successfully" 
     }), {
       status: 200,
       headers: {
