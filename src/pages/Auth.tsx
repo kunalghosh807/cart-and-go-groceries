@@ -58,7 +58,20 @@ const Auth = () => {
             emailRedirectTo: `${window.location.origin}/`
           }
         });
-        if (error) throw error;
+        if (error) {
+          // Check if the error is due to email already being registered
+          if (error.message.toLowerCase().includes('user already registered') || 
+              error.message.toLowerCase().includes('email already registered') ||
+              error.message.toLowerCase().includes('already been registered')) {
+            toast({
+              title: "Account Already Exists",
+              description: "An account with this email already exists. Please sign in instead.",
+              variant: "destructive",
+            });
+            return;
+          }
+          throw error;
+        }
         
         toast({
           title: "Account created!",
