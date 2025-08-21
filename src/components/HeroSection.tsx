@@ -87,7 +87,7 @@ const HeroSection = () => {
                 <div className="relative h-full flex items-center justify-start px-4 sm:px-6 lg:px-8">
                   <div className="max-w-2xl text-left text-white animate-slide-in-left">
                     <h1 className="text-4xl md:text-5xl font-bold mb-4 leading-tight animate-fade-in-up">
-                      Welcome to <span className="bg-gradient-to-r from-yellow-300 to-orange-300 bg-clip-text text-transparent animate-pulse">Cart & Go</span>
+                      Welcome to <span className="bg-gradient-to-r from-yellow-300 to-orange-300 bg-clip-text text-transparent animate-pulse">Shopzo</span>
                     </h1>
                     <h2 className="text-2xl md:text-3xl font-semibold mb-2 text-primary-foreground animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
                       {banner.title}
