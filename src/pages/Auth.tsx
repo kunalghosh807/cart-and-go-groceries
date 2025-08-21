@@ -139,35 +139,40 @@ const Auth = () => {
 
     setLoading(true);
     try {
-      console.log("Verifying OTP:", otp, "for email:", email);
+      console.log("🔍 Verifying OTP:", otp, "for email:", email);
       
-      // Verify OTP with backend before proceeding
+      // First verify OTP with backend
       const { data, error } = await supabase.functions.invoke('verify-otp', {
         body: { 
           email: email.toLowerCase(),
-          otp
+          otp: otp
         }
       });
       
-      console.log("OTP verification response:", { data, error });
+      console.log("✅ OTP verification response:", { data, error });
       
       if (error) {
-        console.error("OTP verification failed:", error);
+        console.error("❌ OTP verification failed:", error);
         throw new Error("Invalid or expired OTP");
       }
       
       if (!data?.success) {
-        console.error("OTP verification returned false");
+        console.error("❌ OTP verification returned false:", data);
         throw new Error("Invalid or expired OTP");
       }
       
-      console.log("OTP verified successfully, proceeding to password reset");
+      console.log("✅ OTP verified successfully, proceeding to password reset");
       
       // OTP is valid, proceed to password reset
+      toast({
+        title: "OTP Verified!",
+        description: "Please enter your new password.",
+      });
+      
       setShowOtpVerification(false);
       setShowNewPassword(true);
     } catch (error: any) {
-      console.error("OTP verification error:", error);
+      console.error("❌ OTP verification error:", error);
       toast({
         title: "Invalid OTP",
         description: "The verification code is invalid or has expired. Please try again.",
@@ -200,23 +205,40 @@ const Auth = () => {
 
     setLoading(true);
     try {
-      const { error } = await supabase.functions.invoke('verify-otp-and-reset-password', {
+      console.log("🔄 Resetting password for email:", email);
+      
+      // Call the password reset function with verified OTP
+      const { data, error } = await supabase.functions.invoke('verify-otp-and-reset-password', {
         body: { 
           email: email.toLowerCase(),
-          otp,
-          newPassword
+          otp: otp,
+          newPassword: newPassword
         }
       });
       
-      if (error) throw error;
+      console.log("🔄 Password reset response:", { data, error });
+      
+      if (error) {
+        console.error("❌ Password reset failed:", error);
+        throw error;
+      }
+      
+      if (!data?.success) {
+        console.error("❌ Password reset returned false:", data);
+        throw new Error("Failed to reset password");
+      }
+      
+      console.log("✅ Password reset successful!");
       
       toast({
         title: "Password Reset Successful!",
         description: "You can now sign in with your new password.",
       });
       
-      // Reset all states
+      // Reset all states and go back to login
       setShowNewPassword(false);
+      setShowOtpVerification(false);
+      setShowForgotPassword(false);
       setOtp('');
       setNewPassword('');
       setConfirmPassword('');
@@ -224,9 +246,10 @@ const Auth = () => {
       setPassword('');
       
     } catch (error: any) {
+      console.error("❌ Password reset error:", error);
       toast({
         title: "Error",
-        description: error.message || "Failed to reset password",
+        description: error.message || "Failed to reset password. Please try again.",
         variant: "destructive",
       });
       

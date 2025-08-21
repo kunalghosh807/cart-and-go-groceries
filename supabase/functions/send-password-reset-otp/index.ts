@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.52.0';
+import { Resend } from "npm:resend@2.0.0";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -64,10 +65,39 @@ const handler = async (req: Request): Promise<Response> => {
 
     console.log("OTP stored in database successfully");
 
-    // For testing: Return the OTP in response (remove in production)
+    // Send email with Resend
+    try {
+      const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
+      
+      const emailResponse = await resend.emails.send({
+        from: "Shopzo <onboarding@resend.dev>",
+        to: [email],
+        subject: "Password Reset Code - Shopzo",
+        html: `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+            <h2 style="color: #333;">Password Reset Request</h2>
+            <p>Hello,</p>
+            <p>You requested a password reset for your Shopzo account. Please use the verification code below:</p>
+            <div style="background-color: #f0f0f0; padding: 20px; text-align: center; margin: 20px 0;">
+              <h1 style="color: #007bff; font-size: 32px; margin: 0; letter-spacing: 8px;">${otpCode}</h1>
+            </div>
+            <p><strong>This code will expire in 10 minutes.</strong></p>
+            <p>If you didn't request this password reset, please ignore this email.</p>
+            <p>Best regards,<br>The Shopzo Team</p>
+          </div>
+        `,
+      });
+
+      console.log("Email sent successfully:", emailResponse);
+    } catch (emailError) {
+      console.error("Failed to send email:", emailError);
+      // Still continue - OTP is stored and can be used for testing
+    }
+
+    // For testing: Return the OTP in response (REMOVE THIS IN PRODUCTION)
     return new Response(JSON.stringify({ 
       success: true, 
-      message: "OTP sent successfully",
+      message: "OTP sent successfully to your email",
       // REMOVE THIS IN PRODUCTION - only for testing
       debug_otp: otpCode
     }), {
