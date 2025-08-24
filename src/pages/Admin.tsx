@@ -648,6 +648,14 @@ const Admin = () => {
           <h1 className="text-3xl font-bold">Product Management</h1>
           <div className="flex gap-3">
             <Button 
+              onClick={() => navigate('/admin/banners')} 
+              variant="outline" 
+              className="flex items-center gap-2"
+            >
+              <Edit className="h-4 w-4" />
+              Edit Banner
+            </Button>
+            <Button 
               onClick={() => setIsCategoryModalOpen(true)} 
               variant="outline" 
               className="flex items-center gap-2"

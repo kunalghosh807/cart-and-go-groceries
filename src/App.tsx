@@ -19,6 +19,7 @@ import Deals from "./pages/Deals";
 import Auth from "./pages/Auth";
 import Search from "./pages/Search";
 import Admin from "./pages/Admin";
+import BannerManagement from "./pages/BannerManagement";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -45,6 +46,7 @@ const App = () => (
               <Route path="/deals" element={<Deals />} />
               <Route path="/auth" element={<Auth />} />
               <Route path="/admin" element={<Admin />} />
+              <Route path="/admin/banners" element={<BannerManagement />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>
