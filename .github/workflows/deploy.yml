@@ -26,10 +26,15 @@ jobs:
     - name: Build project
       run: npm run build
       env:
+        VITE_SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+        VITE_SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
         SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
         SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+        SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+        RAZORPAY_KEY_ID: ${{ secrets.RAZORPAY_KEY_ID }}
+        RAZORPAY_KEY_SECRET: ${{ secrets.RAZORPAY_KEY_SECRET }}
         RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
-        RAZORPAY_API_KEY: ${{ secrets.RAZORPAY_API_KEY }}
         
     - name: Deploy to GitHub Pages
       uses: peaceiris/actions-gh-pages@v3
