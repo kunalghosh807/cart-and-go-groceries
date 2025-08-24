@@ -58,7 +58,7 @@ const handler = async (req: Request): Promise<Response> => {
     if (!userExists) {
       console.log("Email not registered:", email);
       return new Response(JSON.stringify({ 
-        error: "Email not registered. Please sign up first or check your email address." 
+        error: "Email not registered" 
       }), {
         status: 400,
         headers: {

@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { InputOTP, InputOTPGroup, InputOTPSlot } from '@/components/ui/input-otp';
 import { useToast } from '@/hooks/use-toast';
+import { ToastAction } from '@/components/ui/toast';
 import { supabase } from '@/integrations/supabase/client';
 
 const Auth = () => {
@@ -177,37 +178,118 @@ const Auth = () => {
     }
 
     setLoading(true);
+    const currentEmail = email;
+    
     try {
       const { data, error } = await supabase.functions.invoke('send-password-reset-otp', {
         body: { email }
       });
       
+      // Handle Edge Function errors (non-2xx status codes)
       if (error) {
-        // Check if it's an unregistered email error (400 status)
-        if (error.message && error.message.includes("Email not registered")) {
+        // Check all possible error locations
+        let errorMessage = '';
+        let isEmailNotRegistered = false;
+        
+        // Check error.message
+        if (error.message) {
+          errorMessage = error.message;
+          if (error.message.toLowerCase().includes('email not registered')) {
+            isEmailNotRegistered = true;
+          }
+        }
+        
+        // Check error.context.body
+        if (error.context && error.context.body) {
+          try {
+            const errorBody = JSON.parse(error.context.body);
+            if (errorBody.error) {
+              errorMessage = errorBody.error;
+              if (errorBody.error.toLowerCase().includes('email not registered')) {
+                isEmailNotRegistered = true;
+              }
+            }
+          } catch (parseError) {
+            // Ignore parse errors
+          }
+        }
+        
+        // Check if error itself has an error property
+        if (error.error) {
+          errorMessage = error.error;
+          if (error.error.toLowerCase().includes('email not registered')) {
+            isEmailNotRegistered = true;
+          }
+        }
+        
+        // Check for the specific Supabase error message and 400 status
+        if (error.message && error.message.includes('Edge Function returned a non-2xx status code')) {
+          // This is likely an unregistered email (400 status from our Edge Function)
           toast({
-            title: "Account Not Found",
-            description: "No account found with this email address. Please sign up first or check your email.",
+            title: "Email Not Registered",
+            description: "This email is not registered. Redirecting to sign up...",
             variant: "destructive",
           });
+          
+          setTimeout(() => {
+            setShowForgotPassword(false);
+            setIsLogin(false);
+            setEmail(currentEmail);
+          }, 1500);
           return;
         }
-        throw error;
+        
+        // Also check for explicit "Email not registered" in any error field
+        if (isEmailNotRegistered) {
+          toast({
+            title: "Email Not Registered",
+            description: "This email is not registered. Redirecting to sign up...",
+            variant: "destructive",
+          });
+          
+          setTimeout(() => {
+            setShowForgotPassword(false);
+            setIsLogin(false);
+            setEmail(currentEmail);
+          }, 1500);
+          return;
+        }
+        
+        // Handle other errors
+        toast({
+          title: "Error",
+          description: errorMessage || "Failed to send OTP. Please check your email and try again.",
+          variant: "destructive",
+        });
+        return;
       }
       
-      // Check if the response contains an error (for 400 status responses)
+      // Check if the response contains an error (for successful requests with error data)
       if (data && data.error) {
-        if (data.error.includes("Email not registered")) {
+        if (data.error.toLowerCase().includes("email not registered")) {
           toast({
-            title: "Account Not Found",
-            description: "No account found with this email address. Please sign up first or check your email.",
+            title: "Email Not Registered", 
+            description: "This email is not registered. Redirecting to sign up...",
             variant: "destructive",
           });
+          
+          setTimeout(() => {
+            setShowForgotPassword(false);
+            setIsLogin(false);
+            setEmail(currentEmail);
+          }, 1500);
           return;
         }
-        throw new Error(data.error);
+        
+        toast({
+          title: "Error",
+          description: data.error,
+          variant: "destructive",
+        });
+        return;
       }
       
+      // Success case
       toast({
         title: "OTP Sent!",
         description: "Check your email for the 6-digit verification code. Check spam folder if not found.",
