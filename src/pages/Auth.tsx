@@ -183,7 +183,29 @@ const Auth = () => {
       });
       
       if (error) {
+        // Check if it's an unregistered email error (400 status)
+        if (error.message && error.message.includes("Email not registered")) {
+          toast({
+            title: "Account Not Found",
+            description: "No account found with this email address. Please sign up first or check your email.",
+            variant: "destructive",
+          });
+          return;
+        }
         throw error;
+      }
+      
+      // Check if the response contains an error (for 400 status responses)
+      if (data && data.error) {
+        if (data.error.includes("Email not registered")) {
+          toast({
+            title: "Account Not Found",
+            description: "No account found with this email address. Please sign up first or check your email.",
+            variant: "destructive",
+          });
+          return;
+        }
+        throw new Error(data.error);
       }
       
       toast({

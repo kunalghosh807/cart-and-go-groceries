@@ -45,6 +45,31 @@ const handler = async (req: Request): Promise<Response> => {
 
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
+    // First, check if the email is registered
+    const { data: userData, error: userError } = await supabase.auth.admin.listUsers();
+    
+    if (userError) {
+      console.error("Error checking user:", userError);
+      throw new Error("Failed to validate email");
+    }
+    
+    const userExists = userData.users.some(user => user.email?.toLowerCase() === email.toLowerCase());
+    
+    if (!userExists) {
+      console.log("Email not registered:", email);
+      return new Response(JSON.stringify({ 
+        error: "Email not registered. Please sign up first or check your email address." 
+      }), {
+        status: 400,
+        headers: {
+          "Content-Type": "application/json",
+          ...corsHeaders,
+        },
+      });
+    }
+    
+    console.log("Email is registered, proceeding with OTP generation");
+
     // Generate 6-digit OTP
     const otpCode = generateOTP();
     console.log("Generated OTP:", otpCode, "for email:", email);
@@ -81,7 +106,7 @@ const handler = async (req: Request): Promise<Response> => {
       console.log("Using OTP:", otpCode);
       
       const emailResponse = await resend.emails.send({
-        from: "Shopzo <noreply@yourdomain.com>", // Replace with YOUR verified domain
+        from: "Shopzo <onboarding@resend.dev>", // Using Resend's default domain for testing
         to: [email], // Now can send to any email
         subject: "Password Reset Code - Shopzo",
         html: `
