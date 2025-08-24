@@ -61,7 +61,6 @@ const AddPaymentMethodForm: React.FC<{ onSuccess: () => void; onClose: () => voi
       onSuccess();
       onClose();
     } catch (error) {
-      console.error('Error adding payment method:', error);
       toast({
         title: "Error",
         description: error instanceof Error ? error.message : "Failed to add payment method",

@@ -55,7 +55,7 @@ const Auth = () => {
         navigate('/');
       } else {
         // Signup with comprehensive validation
-        const { error } = await supabase.auth.signUp({
+        const { data, error } = await supabase.auth.signUp({
           email: normalizedEmail,
           password,
           options: {
@@ -122,6 +122,21 @@ const Auth = () => {
           throw error;
         }
         
+        // Check for duplicate email signup (Supabase returns user without session for existing emails)
+        if (data && data.user && !data.session && 
+            (!data.user.identities || data.user.identities.length === 0)) {
+          toast({
+            title: "Account Already Exists",
+            description: "An account with this email already exists. Please sign in instead.",
+            variant: "destructive",
+          });
+          
+          // Auto-switch to login mode and populate email
+          setIsLogin(true);
+          setEmail(normalizedEmail);
+          return;
+        }
+        
         toast({
           title: "Account Created Successfully!",
           description: "Please check your email to verify your account before signing in.",
@@ -163,22 +178,11 @@ const Auth = () => {
 
     setLoading(true);
     try {
-      console.log("Sending OTP to:", email);
-      
       const { data, error } = await supabase.functions.invoke('send-password-reset-otp', {
         body: { email }
       });
       
-      console.log("OTP send response:", { data, error });
-      
-      // Show the OTP in console for testing
-      if (data?.debug_otp) {
-        console.log("🔑 TEST OTP CODE:", data.debug_otp);
-        console.log("Use this OTP to verify →", data.debug_otp);
-      }
-      
       if (error) {
-        console.error("Failed to send OTP:", error);
         throw error;
       }
       
@@ -189,7 +193,6 @@ const Auth = () => {
       setShowForgotPassword(false);
       setShowOtpVerification(true);
     } catch (error: any) {
-      console.error("Send OTP error:", error);
       toast({
         title: "Error",
         description: error.message || "Failed to send OTP. Please check your email and try again.",
@@ -213,8 +216,6 @@ const Auth = () => {
 
     setLoading(true);
     try {
-      console.log("🔍 Verifying OTP:", otp, "for email:", email);
-      
       // First verify OTP with backend
       const { data, error } = await supabase.functions.invoke('verify-otp', {
         body: { 
@@ -223,19 +224,13 @@ const Auth = () => {
         }
       });
       
-      console.log("✅ OTP verification response:", { data, error });
-      
       if (error) {
-        console.error("❌ OTP verification failed:", error);
         throw new Error("Invalid or expired OTP");
       }
       
       if (!data?.success) {
-        console.error("❌ OTP verification returned false:", data);
         throw new Error("Invalid or expired OTP");
       }
-      
-      console.log("✅ OTP verified successfully, proceeding to password reset");
       
       // OTP is valid, proceed to password reset
       toast({
@@ -246,7 +241,6 @@ const Auth = () => {
       setShowOtpVerification(false);
       setShowNewPassword(true);
     } catch (error: any) {
-      console.error("❌ OTP verification error:", error);
       toast({
         title: "Invalid OTP",
         description: "The verification code is invalid or has expired. Please try again.",
@@ -279,8 +273,6 @@ const Auth = () => {
 
     setLoading(true);
     try {
-      console.log("🔄 Resetting password for email:", email);
-      
       // Call the password reset function with verified OTP
       const { data, error } = await supabase.functions.invoke('verify-otp-and-reset-password', {
         body: { 
@@ -290,19 +282,13 @@ const Auth = () => {
         }
       });
       
-      console.log("🔄 Password reset response:", { data, error });
-      
       if (error) {
-        console.error("❌ Password reset failed:", error);
         throw error;
       }
       
       if (!data?.success) {
-        console.error("❌ Password reset returned false:", data);
         throw new Error("Failed to reset password");
       }
-      
-      console.log("✅ Password reset successful!");
       
       toast({
         title: "Password Reset Successful!",
@@ -320,7 +306,6 @@ const Auth = () => {
       setPassword('');
       
     } catch (error: any) {
-      console.error("❌ Password reset error:", error);
       toast({
         title: "Error",
         description: error.message || "Failed to reset password. Please try again.",
@@ -383,9 +368,7 @@ const Auth = () => {
                 <p className="text-sm text-gray-600 mb-4">
                   We've sent a 6-digit verification code to {email}
                 </p>
-                <p className="text-xs text-green-600 mb-4">
-                  For testing: Use OTP from browser console (F12 → Console)
-                </p>
+
               </div>
               <div className="flex justify-center">
                 <InputOTP
@@ -414,7 +397,6 @@ const Auth = () => {
                 <button
                   type="button"
                   onClick={() => {
-                    console.log("Resend Code clicked");
                     setShowOtpVerification(false);
                     setShowForgotPassword(true);
                     setOtp('');

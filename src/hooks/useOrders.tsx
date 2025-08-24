@@ -110,7 +110,8 @@ export const useOrders = () => {
           })
           .eq('id', item.id.toString());
 
-        if (stockError) console.error('Stock update error:', stockError);
+        if (stockError) {}
+        // Stock update error handled silently in production
       }
 
       await loadOrders();

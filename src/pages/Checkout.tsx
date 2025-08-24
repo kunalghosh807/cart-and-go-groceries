@@ -75,7 +75,6 @@ const Checkout = () => {
       document.body.appendChild(script);
       
     } catch (error) {
-      console.error('Payment error:', error);
       toast.error('Failed to initiate payment. Please try again.');
     } finally {
       setIsProcessing(false);

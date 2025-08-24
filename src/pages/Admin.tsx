@@ -196,7 +196,7 @@ const Admin = () => {
       .order('name');
     
     if (error) {
-      console.error('Error loading categories:', error);
+      // Error handled silently in production
     } else {
       setDbCategories(data || []);
     }
@@ -215,7 +215,7 @@ const Admin = () => {
       .order('name');
     
     if (error) {
-      console.error('Error loading subcategories:', error);
+      // Error handled silently in production
     } else {
       setDbSubcategories(data || []);
     }

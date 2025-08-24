@@ -57,7 +57,6 @@ const Profile = () => {
         
         setAddresses(data || []);
       } catch (error) {
-        console.error('Error loading addresses:', error);
         toast({
           title: "Error loading addresses",
           description: "Please try again later.",
@@ -80,7 +79,6 @@ const Profile = () => {
         const savedCards = JSON.parse(localStorage.getItem('savedCards') || '[]');
         setPaymentMethods(savedCards);
       } catch (error) {
-        console.error('Error loading payment methods:', error);
         toast({
           title: "Error loading payment methods",
           description: "Please try again later.",
@@ -137,7 +135,6 @@ const Profile = () => {
       
       setAddresses(data || []);
     } catch (error) {
-      console.error('Error loading addresses:', error);
       toast({
         title: "Error loading addresses",
         description: "Please try again later.",
@@ -147,7 +144,6 @@ const Profile = () => {
   };
 
   const handleSaveChanges = async () => {
-    console.log('handleSaveChanges called, editingIndex:', editingIndex);
     // Check if all fields are filled
     const requiredFields = Object.entries(formData);
     const emptyFields = requiredFields.filter(([key, value]) => !value.trim());
@@ -185,7 +181,6 @@ const Profile = () => {
       setLoading(true);
       
       if (editingIndex !== null) {
-        console.log('Updating address at index:', editingIndex);
         const addressToUpdate = addresses[editingIndex];
         
         const { error } = await supabase
@@ -207,7 +202,6 @@ const Profile = () => {
           description: "Your address has been updated.",
         });
       } else {
-        console.log('Adding new address');
         
         const { error } = await supabase
           .from('addresses')
@@ -240,7 +234,6 @@ const Profile = () => {
         zip: ''
       }));
     } catch (error) {
-      console.error('Error saving address:', error);
       toast({
         title: "Error saving address",
         description: "Please try again later.",
@@ -252,7 +245,6 @@ const Profile = () => {
   };
 
   const handleEditAddress = (addressObj: {id: string, name: string, street: string, city: string, state: string, zip: string}, index: number) => {
-    console.log('handleEditAddress called with index:', index);
     const nameParts = addressObj.name.split(' ');
     setFormData(prev => ({
       ...prev,
@@ -286,7 +278,6 @@ const Profile = () => {
         description: "The address has been removed from your profile.",
       });
     } catch (error) {
-      console.error('Error deleting address:', error);
       toast({
         title: "Error deleting address",
         description: "Please try again later.",
@@ -304,7 +295,6 @@ const Profile = () => {
       const savedCards = JSON.parse(localStorage.getItem('savedCards') || '[]');
       setPaymentMethods(savedCards);
     } catch (error) {
-      console.error('Error loading payment methods:', error);
       toast({
         title: "Error loading payment methods",
         description: "Please try again later.",
@@ -337,7 +327,6 @@ const Profile = () => {
       // Refresh payment methods
       loadPaymentMethods();
     } catch (error) {
-      console.error('Error deleting payment method:', error);
       toast({
         title: "Error deleting payment method",
         description: "Please try again later.",
