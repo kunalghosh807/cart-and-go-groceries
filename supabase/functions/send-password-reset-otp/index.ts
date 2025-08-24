@@ -106,20 +106,20 @@ const handler = async (req: Request): Promise<Response> => {
       console.log("Using OTP:", otpCode);
       
       const emailResponse = await resend.emails.send({
-        from: "Shopzo <onboarding@resend.dev>", // Using Resend's default domain for testing
+        from: "Busskit <onboarding@resend.dev>", // Using Resend's default domain for testing
         to: [email], // Now can send to any email
-        subject: "Password Reset Code - Shopzo",
+        subject: "Password Reset Code - Busskit",
         html: `
           <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
             <h2 style="color: #333;">Password Reset Request</h2>
             <p>Hello,</p>
-            <p>You requested a password reset for your Shopzo account. Please use the verification code below:</p>
+            <p>You requested a password reset for your Busskit account. Please use the verification code below:</p>
             <div style="background-color: #f0f0f0; padding: 20px; text-align: center; margin: 20px 0;">
               <h1 style="color: #007bff; font-size: 32px; margin: 0; letter-spacing: 8px;">${otpCode}</h1>
             </div>
             <p><strong>This code will expire in 10 minutes.</strong></p>
             <p>If you didn't request this password reset, please ignore this email.</p>
-            <p>Best regards,<br>The Shopzo Team</p>
+            <p>Best regards,<br>The Busskit Team</p>
           </div>
         `,
       });

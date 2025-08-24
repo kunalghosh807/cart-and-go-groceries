@@ -1,8 +1,6 @@
 
 import React, { useEffect, useState, useCallback } from 'react';
-import { Button } from '@/components/ui/button';
 import { Carousel, CarouselContent, CarouselItem, type CarouselApi } from '@/components/ui/carousel';
-import { ChevronRight } from 'lucide-react';
 import banner1 from '@/assets/banner-1.jpg';
 import banner2 from '@/assets/banner-2.jpg';
 import banner3 from '@/assets/banner-3.jpg';
@@ -77,7 +75,7 @@ const HeroSection = () => {
                 <div className="relative h-full flex items-center justify-start px-4 sm:px-6 lg:px-8">
                   <div className="max-w-2xl text-left text-white animate-slide-in-left">
                     <h1 className="text-4xl md:text-5xl font-bold mb-4 leading-tight animate-fade-in-up">
-                      Welcome to <span className="bg-gradient-to-r from-yellow-300 to-orange-300 bg-clip-text text-transparent animate-pulse">Shopzo</span>
+                      Welcome to <span className="bg-gradient-to-r from-yellow-300 to-orange-300 bg-clip-text text-transparent animate-pulse">Busskit</span>
                     </h1>
                     <h2 className="text-2xl md:text-3xl font-semibold mb-2 text-primary-foreground animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
                       {banner.title}
@@ -85,14 +83,6 @@ const HeroSection = () => {
                     <p className="text-lg text-gray-200 mb-6 max-w-xl animate-fade-in-up" style={{ animationDelay: '0.4s' }}>
                       {banner.subtitle}
                     </p>
-                    <Button 
-                      size="lg" 
-                      className="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold px-8 py-3 rounded-full transition-all duration-300 hover:scale-105 hover:shadow-2xl animate-fade-in-up group"
-                      style={{ animationDelay: '0.6s' }}
-                    >
-                      Shop Now
-                      <ChevronRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
-                    </Button>
                   </div>
                 </div>
               </div>

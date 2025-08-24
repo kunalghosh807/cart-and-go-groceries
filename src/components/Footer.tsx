@@ -9,7 +9,7 @@ const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Company Info */}
           <div>
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Shopzo</h3>
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">Busskit</h3>
             <p className="text-gray-600 mb-4">
               Fresh groceries delivered to your door. Fast, reliable, and always fresh.
             </p>
@@ -95,7 +95,7 @@ const Footer = () => {
         </div>
         
         <div className="mt-8 pt-8 border-t border-gray-200 text-center text-sm text-gray-500">
-          <p>&copy; {new Date().getFullYear()} Shopzo. All rights reserved.</p>
+          <p>&copy; {new Date().getFullYear()} Busskit. All rights reserved.</p>
         </div>
       </div>
     </footer>
