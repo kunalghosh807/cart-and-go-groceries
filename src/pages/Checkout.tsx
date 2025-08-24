@@ -245,6 +245,35 @@ const Checkout = () => {
 
       if (itemsError) throw itemsError;
 
+      // Update stock quantities for each purchased item
+      for (const item of cartItems) {
+        // First get current stock
+        const { data: currentProduct, error: fetchError } = await supabase
+          .from('products')
+          .select('stock_quantity')
+          .eq('id', item.id)
+          .single();
+
+        if (fetchError) {
+          console.error(`Error fetching product ${item.id}:`, fetchError);
+          continue;
+        }
+
+        // Calculate new stock quantity
+        const newStock = Math.max(0, currentProduct.stock_quantity - (item.quantity || 1));
+
+        // Update stock quantity
+        const { error: stockError } = await supabase
+          .from('products')
+          .update({ stock_quantity: newStock })
+          .eq('id', item.id);
+
+        if (stockError) {
+          console.error(`Error updating stock for product ${item.id}:`, stockError);
+          // Continue with other items even if one fails
+        }
+      }
+
     } catch (error) {
       console.error('Error saving order:', error);
       toast.error('Failed to save order. Please contact support.');

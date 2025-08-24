@@ -22,7 +22,9 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
         <img
           src={product.image}
           alt={product.name}
-          className="absolute top-0 left-0 w-full h-full object-cover"
+          className={`absolute top-0 left-0 w-full h-full object-cover ${
+            product.stock_quantity === 0 ? 'filter grayscale' : ''
+          }`}
         />
       </div>
       <CardContent className="p-3 flex-grow">
@@ -33,7 +35,15 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
         </p>
       </CardContent>
       <CardFooter className="p-3 pt-0">
-        {quantityInCart === 0 ? (
+        {product.stock_quantity === 0 ? (
+          <Button 
+            size="sm"
+            className="w-full bg-gray-400 text-white cursor-not-allowed"
+            disabled
+          >
+            Out of Stock
+          </Button>
+        ) : quantityInCart === 0 ? (
           <Button 
             size="sm"
             className="w-full bg-grocery-primary hover:bg-grocery-dark text-white"

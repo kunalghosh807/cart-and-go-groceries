@@ -762,6 +762,7 @@ const Admin = () => {
                     <ArrowUpDown className="ml-2 h-4 w-4 inline" />
                   </TableHead>
                   <TableHead className="w-[100px]">Status</TableHead>
+                  <TableHead className="w-[80px]">Edit</TableHead>
                   <TableHead className="w-[100px]">Actions</TableHead>
                 </TableRow>
               </TableHeader>
@@ -820,6 +821,16 @@ const Admin = () => {
                       </div>
                     </TableCell>
                     <TableCell>
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        onClick={() => openEditModal(product)}
+                        className="h-8 w-8 p-0"
+                      >
+                        <Edit className="h-4 w-4" />
+                      </Button>
+                    </TableCell>
+                    <TableCell>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                           <Button variant="ghost" className="h-8 w-8 p-0">
@@ -827,10 +838,6 @@ const Admin = () => {
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end" className="bg-background">
-                          <DropdownMenuItem onClick={() => openEditModal(product)}>
-                            <Edit className="mr-2 h-4 w-4" />
-                            Edit Product
-                          </DropdownMenuItem>
                           <DropdownMenuItem onClick={() => openPriceModal(product)}>
                             <DollarSign className="mr-2 h-4 w-4" />
                             Update Price
