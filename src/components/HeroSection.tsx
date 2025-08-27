@@ -11,7 +11,8 @@ interface Banner {
   id: string;
   title: string;
   description: string;
-  image_url: string;
+  image_url: string | null;
+  video_url: string | null;
   display_order: number;
   is_active: boolean;
 }
@@ -136,14 +137,27 @@ const HeroSection = () => {
           {banners.map((banner, index) => (
             <CarouselItem key={index} className="h-full">
               <div className="relative h-full">
-                {/* Background Image with Ken Burns Effect */}
-                <div 
-                  className="absolute inset-0 bg-cover bg-center bg-no-repeat animate-[ken-burns_20s_ease-in-out_infinite]"
-                  style={{
-                    backgroundImage: `url(${banner.image_url})`,
-                    transform: 'scale(1.1)',
-                  }}
-                />
+                {/* Background Media with Ken Burns Effect */}
+                {banner.video_url ? (
+                  <video
+                    className="absolute inset-0 w-full h-full object-cover animate-[ken-burns_20s_ease-in-out_infinite]"
+                    style={{ transform: 'scale(1.1)' }}
+                    autoPlay
+                    muted
+                    loop
+                    playsInline
+                  >
+                    <source src={banner.video_url} type="video/mp4" />
+                  </video>
+                ) : (
+                  <div 
+                    className="absolute inset-0 bg-cover bg-center bg-no-repeat animate-[ken-burns_20s_ease-in-out_infinite]"
+                    style={{
+                      backgroundImage: `url(${banner.image_url})`,
+                      transform: 'scale(1.1)',
+                    }}
+                  />
+                )}
                 
                 {/* Gradient Overlay */}
                 <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/40 to-transparent" />

@@ -18,7 +18,8 @@ interface Banner {
   id: string;
   title: string;
   description: string;
-  image_url: string;
+  image_url: string | null;
+  video_url: string | null;
   display_order: number;
   is_active: boolean;
   created_at?: string;
@@ -34,6 +35,7 @@ const BannerManagement = () => {
     title: '',
     description: '',
     image_url: '',
+    video_url: '',
     display_order: 1,
     is_active: true
   });
@@ -71,6 +73,7 @@ const BannerManagement = () => {
       title: '',
       description: '',
       image_url: '',
+      video_url: '',
       display_order: banners.length + 1,
       is_active: true
     });
@@ -83,7 +86,8 @@ const BannerManagement = () => {
     setFormData({
       title: banner.title,
       description: banner.description,
-      image_url: banner.image_url,
+      image_url: banner.image_url || '',
+      video_url: banner.video_url || '',
       display_order: banner.display_order,
       is_active: banner.is_active
     });
@@ -94,14 +98,39 @@ const BannerManagement = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.title.trim() || !formData.description.trim() || !formData.image_url.trim()) {
+    // Validate required fields
+    if (!formData.title.trim() || !formData.description.trim()) {
       toast({
         title: "Missing required fields",
-        description: "Please fill in all required fields",
+        description: "Please fill in title and description",
         variant: "destructive",
       });
       return;
     }
+
+    // Validate that either image_url or video_url is provided, but not both
+    const hasImage = formData.image_url.trim();
+    const hasVideo = formData.video_url.trim();
+    
+    if (!hasImage && !hasVideo) {
+      toast({
+        title: "Error",
+        description: "Please provide either an image URL or a video URL.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    if (hasImage && hasVideo) {
+      toast({
+        title: "Error",
+        description: "Please provide either an image URL or a video URL, not both.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    // Video banners are now supported after database migration
 
     try {
       if (editingBanner) {
@@ -157,15 +186,23 @@ const BannerManagement = () => {
         }
         
         // Now update the banner itself
-        const { error } = await supabase
+        // Prepare update data - include video_url with error handling
+        const updateData: any = {
+          title: formData.title,
+          description: formData.description,
+          image_url: formData.image_url.trim() || null,
+          display_order: newOrder,
+          is_active: formData.is_active
+        };
+        
+        // Add video_url if provided (only if column exists)
+        if (formData.video_url && formData.video_url.trim()) {
+          updateData.video_url = formData.video_url.trim();
+        }
+        
+        const { data, error } = await supabase
           .from('banners')
-          .update({
-            title: formData.title.trim(),
-            description: formData.description.trim(),
-            image_url: formData.image_url.trim(),
-            display_order: newOrder,
-            is_active: formData.is_active
-          })
+          .update(updateData)
           .eq('id', editingBanner.id);
 
         if (error) throw error;
@@ -200,15 +237,23 @@ const BannerManagement = () => {
         }
 
         // Now insert the new banner with the desired order
+        // Prepare insert data - include video_url with error handling
+        const insertData: any = {
+          title: formData.title.trim(),
+          description: formData.description.trim(),
+          image_url: formData.image_url.trim() || null,
+          display_order: newOrder,
+          is_active: formData.is_active
+        };
+        
+        // Add video_url if provided (only if column exists)
+        if (formData.video_url && formData.video_url.trim()) {
+          insertData.video_url = formData.video_url.trim();
+        }
+        
         const { error } = await supabase
           .from('banners')
-          .insert([{
-            title: formData.title.trim(),
-            description: formData.description.trim(),
-            image_url: formData.image_url.trim(),
-            display_order: newOrder,
-            is_active: formData.is_active
-          }]);
+          .insert([insertData]);
 
         if (error) throw error;
 
@@ -220,11 +265,12 @@ const BannerManagement = () => {
 
       setIsModalOpen(false);
       loadBanners();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error saving banner:', error);
+      
       toast({
         title: "Error saving banner",
-        description: "Failed to save banner. Please try again.",
+        description: error?.message || "Failed to save banner. Please try again.",
         variant: "destructive",
       });
     }
@@ -326,9 +372,10 @@ const BannerManagement = () => {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="w-[80px]">Image</TableHead>
+                  <TableHead className="w-[80px]">Media</TableHead>
                   <TableHead>Title</TableHead>
                   <TableHead>Description</TableHead>
+                  <TableHead className="w-[100px]">Type</TableHead>
                   <TableHead className="w-[100px]">Order</TableHead>
                   <TableHead className="w-[100px]">Status</TableHead>
                   <TableHead className="w-[80px]">Edit</TableHead>
@@ -339,14 +386,29 @@ const BannerManagement = () => {
                 {banners.map((banner) => (
                   <TableRow key={banner.id}>
                     <TableCell>
-                      <img 
-                        src={banner.image_url} 
-                        alt={banner.title}
-                        className="w-12 h-12 object-cover rounded"
-                      />
+                      {banner.video_url ? (
+                        <video 
+                          src={banner.video_url} 
+                          className="w-12 h-12 object-cover rounded"
+                          muted
+                        />
+                      ) : (
+                        <img 
+                          src={banner.image_url} 
+                          alt={banner.title}
+                          className="w-12 h-12 object-cover rounded"
+                        />
+                      )}
                     </TableCell>
                     <TableCell className="font-medium">{banner.title}</TableCell>
                     <TableCell className="text-muted-foreground">{banner.description}</TableCell>
+                    <TableCell>
+                      <span className={`px-2 py-1 rounded text-xs font-medium ${
+                        banner.video_url ? 'bg-purple-100 text-purple-800' : 'bg-blue-100 text-blue-800'
+                      }`}>
+                        {banner.video_url ? 'Video' : 'Image'}
+                      </span>
+                    </TableCell>
                     <TableCell>{banner.display_order}</TableCell>
                     <TableCell>
                       <Button
@@ -455,14 +517,31 @@ const BannerManagement = () => {
               </div>
               
               <div>
-                <Label htmlFor="image_url">Image URL *</Label>
+                <Label htmlFor="image_url">Image URL</Label>
                 <Input
                   id="image_url"
                   value={formData.image_url}
-                  onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
+                  onChange={(e) => setFormData({ ...formData, image_url: e.target.value, video_url: e.target.value ? '' : formData.video_url })}
                   placeholder="https://example.com/banner.jpg"
-                  required
+                  disabled={!!formData.video_url}
                 />
+                <p className="text-sm text-muted-foreground mt-1">
+                  {formData.video_url ? 'Clear video URL to add image' : 'Provide either image or video URL'}
+                </p>
+              </div>
+              
+              <div>
+                <Label htmlFor="video_url">Video URL</Label>
+                <Input
+                  id="video_url"
+                  value={formData.video_url}
+                  onChange={(e) => setFormData({ ...formData, video_url: e.target.value, image_url: e.target.value ? '' : formData.image_url })}
+                  placeholder="https://example.com/banner.mp4"
+                  disabled={!!formData.image_url}
+                />
+                <p className="text-sm text-muted-foreground mt-1">
+                  {formData.image_url ? 'Clear image URL to add video' : 'Provide either image or video URL'}
+                </p>
               </div>
               
               <div>
