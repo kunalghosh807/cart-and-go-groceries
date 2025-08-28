@@ -560,11 +560,9 @@ const CategoryManagement = () => {
                     // Current homepage category order based on actual database categories
                     const homepageOrder = [
                       "Beauty & Personal Care",
-                      "Featured Products", 
                       "Grocery & Kitchen",
                       "Grocerry & Kitchen", // Handle typo in database
-                      "Snacks & Drinks",
-                      "Today's Deals"
+                      "Snacks & Drinks"
                     ];
                     
                     // Get homepage position (1-based) or use database order if order_number exists

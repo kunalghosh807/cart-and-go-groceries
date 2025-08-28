@@ -78,8 +78,6 @@ interface Product {
   subcategory: string | null;
   description: string | null;
   stock_quantity: number;
-  is_featured: boolean;
-  is_deal: boolean;
   deal_price: number | null;
   created_at: string;
   updated_at: string;
@@ -117,8 +115,6 @@ const Admin = () => {
     subcategory: '',
     description: '',
     stock_quantity: '',
-    is_featured: false,
-    is_deal: false,
     deal_price: ''
   });
 
@@ -298,8 +294,6 @@ const Admin = () => {
       subcategory: '',
       description: '',
       stock_quantity: '',
-      is_featured: false,
-      is_deal: false,
       deal_price: ''
     });
     setEditingProduct(null);
@@ -508,8 +502,6 @@ const Admin = () => {
       subcategory: product.subcategory || '',
       description: product.description || '',
       stock_quantity: product.stock_quantity.toString(),
-      is_featured: product.is_featured,
-      is_deal: product.is_deal,
       deal_price: product.deal_price?.toString() || ''
     });
     setEditingProduct(product);
@@ -545,8 +537,6 @@ const Admin = () => {
       subcategory: formData.subcategory || null,
       description: formData.description || null,
       stock_quantity: parseInt(formData.stock_quantity),
-      is_featured: formData.is_featured,
-      is_deal: formData.is_deal,
       deal_price: formData.deal_price ? parseFloat(formData.deal_price) : null
     };
 
@@ -904,7 +894,7 @@ const Admin = () => {
                     </TableCell>
                     <TableCell>
                       <div className="font-medium">₹{product.price}</div>
-                      {product.is_deal && product.deal_price && (
+                      {product.deal_price && (
                         <div className="text-sm text-green-600">
                           Deal: ₹{product.deal_price}
                         </div>
@@ -1122,18 +1112,17 @@ const Admin = () => {
                   </Select>
                 </div>
                 
-                {formData.is_deal && (
-                  <div>
-                    <Label htmlFor="deal_price">Deal Price</Label>
-                    <Input
-                      id="deal_price"
-                      type="number"
-                      step="0.01"
-                      value={formData.deal_price}
-                      onChange={(e) => setFormData({ ...formData, deal_price: e.target.value })}
-                    />
-                  </div>
-                )}
+                <div>
+                  <Label htmlFor="deal_price">Deal Price (optional)</Label>
+                  <Input
+                    id="deal_price"
+                    type="number"
+                    step="0.01"
+                    value={formData.deal_price}
+                    onChange={(e) => setFormData({ ...formData, deal_price: e.target.value })}
+                    placeholder="Enter deal price"
+                  />
+                </div>
                 
                 <div className="md:col-span-2">
                   <Label htmlFor="description">Description</Label>
@@ -1145,23 +1134,7 @@ const Admin = () => {
                   />
                 </div>
                 
-                <div className="flex items-center space-x-2">
-                  <Switch
-                    id="is_featured"
-                    checked={formData.is_featured}
-                    onCheckedChange={(checked) => setFormData({ ...formData, is_featured: checked })}
-                  />
-                  <Label htmlFor="is_featured">Featured Product</Label>
-                </div>
-                
-                <div className="flex items-center space-x-2">
-                  <Switch
-                    id="is_deal"
-                    checked={formData.is_deal}
-                    onCheckedChange={(checked) => setFormData({ ...formData, is_deal: checked })}
-                  />
-                  <Label htmlFor="is_deal">Deal Product</Label>
-                </div>
+
               </div>
               
               <DialogFooter>

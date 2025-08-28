@@ -31,7 +31,7 @@ async function categorizeCategories() {
     // Get all products
     const { data: products, error: productsError } = await supabase
       .from('products')
-      .select('id, category, subcategory, is_featured, is_deal');
+      .select('id, category, subcategory');
     
     if (productsError) {
       console.error('Error fetching products:', productsError);
@@ -70,13 +70,9 @@ async function categorizeCategories() {
                   product.subcategory === undefined);
         });
         
-        // Also check for special categories that display products via flags
-        const isFeaturedCategory = category.name === 'Featured Products';
-        const isDealsCategory = category.name === "Today's Deals";
-        
-        if (directProducts.length > 0 || isFeaturedCategory || isDealsCategory) {
+        if (directProducts.length > 0) {
           categoryType = 'productcard_category';
-          console.log(`${category.name}: Has ${directProducts.length} direct products or is special category -> productcard_category`);
+          console.log(`${category.name}: Has ${directProducts.length} direct products -> productcard_category`);
         } else {
           console.log(`${category.name}: Empty -> empty_category`);
         }

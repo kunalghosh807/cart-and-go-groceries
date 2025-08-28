@@ -4,8 +4,6 @@ import { Product } from '@/hooks/useCart';
 
 export const useProducts = () => {
   const [products, setProducts] = useState<Product[]>([]);
-  const [featuredProducts, setFeaturedProducts] = useState<Product[]>([]);
-  const [dealProducts, setDealProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -27,8 +25,6 @@ export const useProducts = () => {
         description: p.description || undefined
       }));
       setProducts(allProducts);
-      setFeaturedProducts(allProducts.filter(p => p.is_featured));
-      setDealProducts(allProducts.filter(p => p.is_deal));
       setError(null);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred');
@@ -83,8 +79,6 @@ export const useProducts = () => {
 
   return {
     products,
-    featuredProducts,
-    dealProducts,
     loading,
     error,
     getProductsByCategory,

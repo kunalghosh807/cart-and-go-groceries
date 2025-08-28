@@ -128,9 +128,7 @@ const Navbar = () => {
             <Link to="/categories" className="text-gray-600 hover:text-grocery-primary px-3 py-2 text-sm font-medium">
               Categories
             </Link>
-            <Link to="/deals" className="text-gray-600 hover:text-grocery-primary px-3 py-2 text-sm font-medium">
-              Deals
-            </Link>
+
             
             {user ? (
               <DropdownMenu>
@@ -255,13 +253,7 @@ const Navbar = () => {
               >
                 Categories
               </Link>
-              <Link 
-                to="/deals" 
-                className="block px-3 py-2 text-base font-medium text-gray-600 hover:text-grocery-primary hover:bg-gray-50 rounded-md"
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                Deals
-              </Link>
+
               
               {user ? (
                 <>

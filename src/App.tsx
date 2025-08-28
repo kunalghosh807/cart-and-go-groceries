@@ -15,7 +15,7 @@ import Profile from "./pages/Profile";
 import Categories from "./pages/Categories";
 import CategoryProducts from "./pages/CategoryProducts";
 import SubcategoryProducts from "./pages/SubcategoryProducts";
-import Deals from "./pages/Deals";
+
 import Auth from "./pages/Auth";
 import Search from "./pages/Search";
 import Admin from "./pages/Admin";
@@ -45,7 +45,7 @@ const App = () => (
               <Route path="/categories/:categoryId" element={<CategoryProducts />} />
               <Route path="/categories/:categoryId/:subcategoryId" element={<SubcategoryProducts />} />
               <Route path="/search" element={<Search />} />
-              <Route path="/deals" element={<Deals />} />
+
               <Route path="/auth" element={<Auth />} />
               <Route path="/admin" element={<Admin />} />
               <Route path="/admin/banners" element={<BannerManagement />} />

@@ -3,16 +3,14 @@ import React, { createContext, useContext, useState, ReactNode } from 'react';
 import { toast } from '@/components/ui/use-toast';
 
 export interface Product {
-  id: string;
+  id: number;
   name: string;
   price: number;
   image: string;
   category: string;
-  subcategory?: string;
-  description?: string;
+  subcategory: string;
+  description: string;
   stock_quantity: number;
-  is_featured: boolean;
-  is_deal: boolean;
   deal_price?: number;
   quantity: number;
 }

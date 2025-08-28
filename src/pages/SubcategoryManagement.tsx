@@ -46,8 +46,6 @@ const SubcategoryManagement = () => {
     category_id: '',
     description: '',
     stock_quantity: '0',
-    is_featured: false,
-    is_deal: false,
     deal_price: ''
   });
   const [searchTerm, setSearchTerm] = useState('');
@@ -300,24 +298,22 @@ const SubcategoryManagement = () => {
 
   const openProductModal = () => {
     setProductFormData({
-      name: '',
-      price: '',
-      image: '',
-      category_id: '',
-      description: '',
-      stock_quantity: '0',
-      is_featured: false,
-      is_deal: false,
-      deal_price: ''
-    });
+        name: '',
+        price: '',
+        image: '',
+        category_id: '',
+        description: '',
+        stock_quantity: '0',
+        deal_price: ''
+      });
     setIsProductModalOpen(true);
   };
 
   const addProductDirectly = async () => {
-    if (!productFormData.name.trim() || !productFormData.price || !productFormData.category_id) {
+    if (!productFormData.name.trim() || !productFormData.price || !productFormData.category_id || !productFormData.image.trim()) {
       toast({
         title: "Validation Error",
-        description: "Please fill in all required fields",
+        description: "Please fill in all required fields including image URL",
         variant: "destructive",
       });
       return;
@@ -335,9 +331,7 @@ const SubcategoryManagement = () => {
         subcategory_id: null, // Direct to category, no subcategory
         description: productFormData.description.trim() || null,
         stock_quantity: parseInt(productFormData.stock_quantity) || 0,
-        is_featured: productFormData.is_featured,
-        is_deal: productFormData.is_deal,
-        deal_price: productFormData.is_deal && productFormData.deal_price ? parseFloat(productFormData.deal_price) : null
+        deal_price: productFormData.deal_price ? parseFloat(productFormData.deal_price) : null
       };
 
       const { error } = await supabase
@@ -366,8 +360,6 @@ const SubcategoryManagement = () => {
         category_id: '',
         description: '',
         stock_quantity: '0',
-        is_featured: false,
-        is_deal: false,
         deal_price: ''
       });
     } catch (error) {
@@ -787,12 +779,13 @@ const SubcategoryManagement = () => {
               </div>
               
               <div>
-                <Label htmlFor="productImage">Product Image URL</Label>
+                <Label htmlFor="productImage">Product Image URL *</Label>
                 <Input
                   id="productImage"
                   value={productFormData.image}
                   onChange={(e) => setProductFormData({ ...productFormData, image: e.target.value })}
-                  placeholder="Enter image URL (optional)"
+                  placeholder="Enter image URL"
+                  required
                 />
               </div>
               
@@ -821,7 +814,7 @@ const SubcategoryManagement = () => {
                 </div>
                 
                 <div>
-                  <Label htmlFor="productDealPrice">Deal Price (if on deal)</Label>
+                  <Label htmlFor="productDealPrice">Deal Price (optional)</Label>
                   <Input
                     id="productDealPrice"
                     type="number"
@@ -830,28 +823,7 @@ const SubcategoryManagement = () => {
                     value={productFormData.deal_price}
                     onChange={(e) => setProductFormData({ ...productFormData, deal_price: e.target.value })}
                     placeholder="Enter deal price"
-                    disabled={!productFormData.is_deal}
                   />
-                </div>
-              </div>
-              
-              <div className="flex flex-wrap gap-4">
-                <div className="flex items-center space-x-2">
-                  <Switch
-                    id="productFeatured"
-                    checked={productFormData.is_featured}
-                    onCheckedChange={(checked) => setProductFormData({ ...productFormData, is_featured: checked })}
-                  />
-                  <Label htmlFor="productFeatured">Featured Product</Label>
-                </div>
-                
-                <div className="flex items-center space-x-2">
-                  <Switch
-                    id="productDeal"
-                    checked={productFormData.is_deal}
-                    onCheckedChange={(checked) => setProductFormData({ ...productFormData, is_deal: checked, deal_price: checked ? productFormData.deal_price : '' })}
-                  />
-                  <Label htmlFor="productDeal">On Deal</Label>
                 </div>
               </div>
             </div>
@@ -866,8 +838,6 @@ const SubcategoryManagement = () => {
                   category_id: '',
                   description: '',
                   stock_quantity: '0',
-                  is_featured: false,
-                  is_deal: false,
                   deal_price: ''
                 });
               }}>

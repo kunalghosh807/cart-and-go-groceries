@@ -46,7 +46,7 @@ const Footer = () => {
                 <Link to="/categories" className="text-gray-600 hover:text-grocery-primary">Categories</Link>
               </li>
               <li>
-                <Link to="/deals" className="text-gray-600 hover:text-grocery-primary">Deals & Offers</Link>
+
               </li>
               <li>
                 <Link to="/cart" className="text-gray-600 hover:text-grocery-primary">My Cart</Link>

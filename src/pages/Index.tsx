@@ -11,8 +11,48 @@ import { useProducts } from '@/hooks/useProducts';
 import { useCategories } from '@/hooks/useCategories';
 import { useSubcategories } from '@/hooks/useSubcategories';
 
+// Component for displaying product card sections
+const ProductCardSection = ({ section, getProductsByCategory }) => {
+  const [categoryProducts, setCategoryProducts] = React.useState([]);
+  const [categoryLoading, setCategoryLoading] = React.useState(true);
+  
+  React.useEffect(() => {
+    const loadCategoryProducts = async () => {
+      setCategoryLoading(true);
+      const products = await getProductsByCategory(section.dbCategory.id);
+      setCategoryProducts(products);
+      setCategoryLoading(false);
+    };
+    loadCategoryProducts();
+  }, [section.dbCategory.id, getProductsByCategory]);
+  
+  return (
+    <section className="mb-12">
+      <div className="flex items-center justify-between mb-6">
+        <h2 className="text-2xl font-bold">{section.name}</h2>
+        <Button variant="link" className="text-grocery-primary">
+          View All <ChevronRight className="h-4 w-4 ml-1" />
+        </Button>
+      </div>
+      <div className="flex gap-3 overflow-x-auto pb-4 scrollbar-hide">
+        {categoryLoading ? (
+          <div className="text-muted-foreground">Loading products...</div>
+        ) : categoryProducts.length > 0 ? (
+          categoryProducts.map((product) => (
+            <div key={product.id} className="flex-none">
+              <ProductCard product={product} />
+            </div>
+          ))
+        ) : (
+          <div className="text-muted-foreground">No products available</div>
+        )}
+      </div>
+    </section>
+  );
+};
+
 const Index = () => {
-  const { featuredProducts, dealProducts, loading, getProductsByCategory } = useProducts();
+  const { loading, getProductsByCategory } = useProducts();
   const { categories: dbCategories, loading: categoriesLoading } = useCategories();
   const { subcategories, loading: subcategoriesLoading } = useSubcategories();
 
@@ -33,18 +73,15 @@ const Index = () => {
     const sections = [];
     
     sortedDbCategories.forEach((category) => {
-      // Handle each category based on its exact database name and order
-      if (category.name === 'Featured Products') {
-        // Special featured products section
-        sections.push({ type: 'featured', dbCategory: category });
-      } else if (category.name === "Today's Deals") {
-        // Special deals section
-        sections.push({ type: 'deals', dbCategory: category });
-      } else if (category.name === 'Grocerry & Kitchen' || category.name === 'Snacks & Drinks' || category.name === 'Beauty & Personal Care' || category.name === 'Beauty & Personal C') {
-        // Main category sections - use exact database name
+      // Handle each category based on its category_type
+      if (category.category_type === 'productcard_category') {
+        // Categories that display products directly
+        sections.push({ type: 'productcard', name: category.name, dbCategory: category });
+      } else if (category.category_type === 'subcategory_category') {
+        // Categories that display subcategories
         sections.push({ type: 'category', name: category.name, dbCategory: category });
       } else {
-        // For other categories, show them as custom sections with exact database name
+        // Empty categories or fallback
         sections.push({ type: 'custom', name: category.name, dbCategory: category });
       }
     });
@@ -147,53 +184,16 @@ const Index = () => {
                 );
               }
               
-              if (section.type === 'featured') {
-                // Featured Products section
-                return (
-                  <section key="featured-products" className="mb-12">
-                    <div className="flex items-center justify-between mb-6">
-                      <h2 className="text-2xl font-bold">Featured Products</h2>
-                      <Button variant="link" className="text-grocery-primary">
-                        View All <ChevronRight className="h-4 w-4 ml-1" />
-                      </Button>
-                    </div>
-                    <div className="flex gap-3 overflow-x-auto pb-4 scrollbar-hide">
-                      {loading ? (
-                        <div className="text-muted-foreground">Loading products...</div>
-                      ) : (
-                        featuredProducts.map((product) => (
-                          <div key={product.id} className="flex-none">
-                            <ProductCard product={product} />
-                          </div>
-                        ))
-                      )}
-                    </div>
-                  </section>
-                );
-              }
+
               
-              if (section.type === 'deals') {
-                // Today's Deals section
+              if (section.type === 'productcard') {
+                // Categories with direct products (like "Kunal")
                 return (
-                  <section key="deals-section" className="mb-12">
-                    <div className="flex items-center justify-between mb-6">
-                      <h2 className="text-2xl font-bold">Today's Deals</h2>
-                      <Button variant="link" className="text-grocery-primary">
-                        View All <ChevronRight className="h-4 w-4 ml-1" />
-                      </Button>
-                    </div>
-                    <div className="flex gap-3 overflow-x-auto pb-4 scrollbar-hide">
-                      {loading ? (
-                        <div className="text-muted-foreground">Loading deals...</div>
-                      ) : (
-                        dealProducts.map((product) => (
-                          <div key={product.id} className="flex-none">
-                            <ProductCard product={product} />
-                          </div>
-                        ))
-                      )}
-                    </div>
-                  </section>
+                  <ProductCardSection 
+                    key={`productcard-${section.dbCategory.id}`}
+                    section={section}
+                    getProductsByCategory={getProductsByCategory}
+                  />
                 );
               }
               
