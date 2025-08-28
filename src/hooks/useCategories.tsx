@@ -6,6 +6,7 @@ export interface Category {
   name: string;
   order_number?: number;
   active?: boolean;
+  category_type?: string;
   created_at: string;
   updated_at: string;
 }

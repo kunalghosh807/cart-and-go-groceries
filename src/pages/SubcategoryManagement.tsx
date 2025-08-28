@@ -14,6 +14,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Badge } from '@/components/ui/badge';
+import { Textarea } from '@/components/ui/textarea';
 import { ArrowLeft, Plus, Edit, Trash2, Search, Package } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
@@ -29,15 +31,27 @@ const SubcategoryManagement = () => {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const [selectedSubcategory, setSelectedSubcategory] = useState<Subcategory | null>(null);
-  
+  const [isProductModalOpen, setIsProductModalOpen] = useState(false);
+  const [selectedSubcategory, setSelectedSubcategory] = useState<any>(null);
   const [formData, setFormData] = useState({
     name: '',
     category_id: '',
     image: '',
     active: true
   });
+  const [productFormData, setProductFormData] = useState({
+    name: '',
+    price: '',
+    image: '',
+    category_id: '',
+    description: '',
+    stock_quantity: '0',
+    is_featured: false,
+    is_deal: false,
+    deal_price: ''
+  });
   const [searchTerm, setSearchTerm] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('all');
   const [categoryFilter, setCategoryFilter] = useState('all');
 
   useEffect(() => {
@@ -56,6 +70,24 @@ const SubcategoryManagement = () => {
       return;
     }
   }, [user, navigate, toast]);
+
+  // Note: Products fetching removed as we now use category_type from database
+
+  // Get categories that can have subcategories (empty categories or categories with existing subcategories)
+  const getCategoriesAvailableForSubcategories = () => {
+    // Filter categories based on category_type from database
+    // Include: empty_category and subcategory_category
+    // Exclude: productcard_category
+    const filteredCategories = categories.filter(category => 
+      category.category_type === 'empty_category' || 
+      category.category_type === 'subcategory_category'
+    );
+    
+    console.log('All categories:', categories.map(c => ({ name: c.name, type: c.category_type })));
+    console.log('Filtered categories (available for subcategories):', filteredCategories.map(c => ({ name: c.name, type: c.category_type })));
+    
+    return filteredCategories;
+  };
 
   const addSubcategory = async () => {
     if (!formData.name.trim() || !formData.category_id) {
@@ -253,9 +285,99 @@ const SubcategoryManagement = () => {
     setIsEditModalOpen(true);
   };
 
-  const openDeleteDialog = (subcategory: Subcategory) => {
+  const openDeleteDialog = (subcategory: any) => {
     setSelectedSubcategory(subcategory);
     setIsDeleteDialogOpen(true);
+  };
+
+  // Get categories that have no subcategories (can have direct products)
+  const getCategoriesWithoutSubcategories = () => {
+    return categories.filter(category => {
+      const hasSubcategories = subcategories.some(sub => sub.category_id === category.id);
+      return !hasSubcategories;
+    });
+  };
+
+  const openProductModal = () => {
+    setProductFormData({
+      name: '',
+      price: '',
+      image: '',
+      category_id: '',
+      description: '',
+      stock_quantity: '0',
+      is_featured: false,
+      is_deal: false,
+      deal_price: ''
+    });
+    setIsProductModalOpen(true);
+  };
+
+  const addProductDirectly = async () => {
+    if (!productFormData.name.trim() || !productFormData.price || !productFormData.category_id) {
+      toast({
+        title: "Validation Error",
+        description: "Please fill in all required fields",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      const selectedCat = categories.find(cat => cat.id === productFormData.category_id);
+      
+      const insertData = {
+        name: productFormData.name.trim(),
+        price: parseFloat(productFormData.price),
+        image: productFormData.image || 'https://via.placeholder.com/300x300?text=No+Image',
+        category: selectedCat?.name || '',
+        category_id: productFormData.category_id,
+        subcategory_id: null, // Direct to category, no subcategory
+        description: productFormData.description.trim() || null,
+        stock_quantity: parseInt(productFormData.stock_quantity) || 0,
+        is_featured: productFormData.is_featured,
+        is_deal: productFormData.is_deal,
+        deal_price: productFormData.is_deal && productFormData.deal_price ? parseFloat(productFormData.deal_price) : null
+      };
+
+      const { error } = await supabase
+        .from('products')
+        .insert([insertData]);
+
+      if (error) {
+        toast({
+          title: "Error adding product",
+          description: error.message,
+          variant: "destructive",
+        });
+        return;
+      }
+      
+      toast({
+        title: "Product added",
+        description: `Product "${productFormData.name.trim()}" has been added to ${selectedCat?.name}`,
+      });
+      
+      setIsProductModalOpen(false);
+      setProductFormData({
+        name: '',
+        price: '',
+        image: '',
+        category_id: '',
+        description: '',
+        stock_quantity: '0',
+        is_featured: false,
+        is_deal: false,
+        deal_price: ''
+      });
+    } catch (error) {
+      console.error('Error adding product:', error);
+      toast({
+        title: "Error adding product",
+        description: "Failed to add product",
+        variant: "destructive",
+      });
+    }
   };
 
   if (loading) {
@@ -293,16 +415,27 @@ const SubcategoryManagement = () => {
               Manage your product subcategories and their organization
             </p>
           </div>
-          <Button 
-            onClick={() => {
-              setFormData({ name: '', category_id: '', image: '', active: true });
-              setIsAddModalOpen(true);
-            }}
-            className="flex items-center gap-2"
-          >
-            <Plus className="h-4 w-4" />
-            Add Subcategory
-          </Button>
+          <div className="flex gap-3">
+            <Button 
+              onClick={openProductModal}
+              variant="outline"
+              className="flex items-center gap-2"
+              disabled={getCategoriesWithoutSubcategories().length === 0}
+            >
+              <Package className="h-4 w-4" />
+              Add Products Directly
+            </Button>
+            <Button 
+              onClick={() => {
+                setFormData({ name: '', category_id: '', image: '', active: true });
+                setIsAddModalOpen(true);
+              }}
+              className="flex items-center gap-2"
+            >
+              <Plus className="h-4 w-4" />
+              Add Subcategory
+            </Button>
+          </div>
         </div>
 
         {/* Search and Filters */}
@@ -445,7 +578,7 @@ const SubcategoryManagement = () => {
                     <SelectValue placeholder="Select a category" />
                   </SelectTrigger>
                   <SelectContent>
-                    {categories.map((category) => (
+                    {getCategoriesAvailableForSubcategories().map((category) => (
                       <SelectItem key={category.id} value={category.id}>
                         {category.name}
                       </SelectItem>
@@ -518,7 +651,7 @@ const SubcategoryManagement = () => {
                     <SelectValue placeholder="Select a category" />
                   </SelectTrigger>
                   <SelectContent>
-                    {categories.map((category) => (
+                    {getCategoriesAvailableForSubcategories().map((category) => (
                       <SelectItem key={category.id} value={category.id}>
                         {category.name}
                       </SelectItem>
@@ -594,6 +727,158 @@ const SubcategoryManagement = () => {
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
+
+        {/* Add Product Directly Modal */}
+        <Dialog open={isProductModalOpen} onOpenChange={setIsProductModalOpen}>
+          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>Add Product Directly to Category</DialogTitle>
+              <DialogDescription>
+                Add a product directly to a category that has no subcategories
+              </DialogDescription>
+            </DialogHeader>
+            
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="productCategory">Select Category *</Label>
+                <Select
+                  value={productFormData.category_id}
+                  onValueChange={(value) => setProductFormData({ ...productFormData, category_id: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a category without subcategories" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {getCategoriesWithoutSubcategories().map((category) => (
+                      <SelectItem key={category.id} value={category.id}>
+                        {category.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <p className="text-sm text-gray-500 mt-1">
+                  Only categories without subcategories are shown
+                </p>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="productName">Product Name *</Label>
+                  <Input
+                    id="productName"
+                    value={productFormData.name}
+                    onChange={(e) => setProductFormData({ ...productFormData, name: e.target.value })}
+                    placeholder="Enter product name"
+                  />
+                </div>
+                
+                <div>
+                  <Label htmlFor="productPrice">Price *</Label>
+                  <Input
+                    id="productPrice"
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    value={productFormData.price}
+                    onChange={(e) => setProductFormData({ ...productFormData, price: e.target.value })}
+                    placeholder="Enter price"
+                  />
+                </div>
+              </div>
+              
+              <div>
+                <Label htmlFor="productImage">Product Image URL</Label>
+                <Input
+                  id="productImage"
+                  value={productFormData.image}
+                  onChange={(e) => setProductFormData({ ...productFormData, image: e.target.value })}
+                  placeholder="Enter image URL (optional)"
+                />
+              </div>
+              
+              <div>
+                <Label htmlFor="productDescription">Description</Label>
+                <Textarea
+                  id="productDescription"
+                  value={productFormData.description}
+                  onChange={(e) => setProductFormData({ ...productFormData, description: e.target.value })}
+                  placeholder="Enter product description (optional)"
+                  rows={3}
+                />
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="productStock">Stock Quantity</Label>
+                  <Input
+                    id="productStock"
+                    type="number"
+                    min="0"
+                    value={productFormData.stock_quantity}
+                    onChange={(e) => setProductFormData({ ...productFormData, stock_quantity: e.target.value })}
+                    placeholder="Enter stock quantity"
+                  />
+                </div>
+                
+                <div>
+                  <Label htmlFor="productDealPrice">Deal Price (if on deal)</Label>
+                  <Input
+                    id="productDealPrice"
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    value={productFormData.deal_price}
+                    onChange={(e) => setProductFormData({ ...productFormData, deal_price: e.target.value })}
+                    placeholder="Enter deal price"
+                    disabled={!productFormData.is_deal}
+                  />
+                </div>
+              </div>
+              
+              <div className="flex flex-wrap gap-4">
+                <div className="flex items-center space-x-2">
+                  <Switch
+                    id="productFeatured"
+                    checked={productFormData.is_featured}
+                    onCheckedChange={(checked) => setProductFormData({ ...productFormData, is_featured: checked })}
+                  />
+                  <Label htmlFor="productFeatured">Featured Product</Label>
+                </div>
+                
+                <div className="flex items-center space-x-2">
+                  <Switch
+                    id="productDeal"
+                    checked={productFormData.is_deal}
+                    onCheckedChange={(checked) => setProductFormData({ ...productFormData, is_deal: checked, deal_price: checked ? productFormData.deal_price : '' })}
+                  />
+                  <Label htmlFor="productDeal">On Deal</Label>
+                </div>
+              </div>
+            </div>
+            
+            <DialogFooter>
+              <Button variant="outline" onClick={() => {
+                setIsProductModalOpen(false);
+                setProductFormData({
+                  name: '',
+                  price: '',
+                  image: '',
+                  category_id: '',
+                  description: '',
+                  stock_quantity: '0',
+                  is_featured: false,
+                  is_deal: false,
+                  deal_price: ''
+                });
+              }}>
+                Cancel
+              </Button>
+              <Button onClick={addProductDirectly}>
+                Add Product
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
       <Footer />
     </div>
