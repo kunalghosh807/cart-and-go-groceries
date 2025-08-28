@@ -91,6 +91,7 @@ export type Database = {
       }
       categories: {
         Row: {
+          active: boolean
           created_at: string | null
           id: string
           image: string | null
@@ -99,6 +100,7 @@ export type Database = {
           updated_at: string | null
         }
         Insert: {
+          active?: boolean
           created_at?: string | null
           id?: string
           image?: string | null
@@ -107,6 +109,7 @@ export type Database = {
           updated_at?: string | null
         }
         Update: {
+          active?: boolean
           created_at?: string | null
           id?: string
           image?: string | null
@@ -277,6 +280,7 @@ export type Database = {
       }
       subcategories: {
         Row: {
+          active: boolean
           category_id: string
           created_at: string | null
           id: string
@@ -285,6 +289,7 @@ export type Database = {
           updated_at: string | null
         }
         Insert: {
+          active?: boolean
           category_id: string
           created_at?: string | null
           id?: string
@@ -293,6 +298,7 @@ export type Database = {
           updated_at?: string | null
         }
         Update: {
+          active?: boolean
           category_id?: string
           created_at?: string | null
           id?: string

@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
+import { useCategories } from '@/hooks/useCategories';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -19,6 +20,7 @@ interface Category {
   id: string;
   name: string;
   order_number?: number;
+  active: boolean;
   created_at: string;
   updated_at: string;
 }
@@ -27,9 +29,8 @@ const CategoryManagement = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { categories, loading, refreshCategories } = useCategories(true); // Include inactive categories for admin
   
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [loading, setLoading] = useState(true);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
@@ -38,7 +39,8 @@ const CategoryManagement = () => {
   
   const [formData, setFormData] = useState({
     name: '',
-    order_number: ''
+    order_number: '',
+    active: true
   });
 
   useEffect(() => {
@@ -57,125 +59,21 @@ const CategoryManagement = () => {
       navigate('/');
       return;
     }
-    
-    loadCategories();
   }, [user, navigate, toast]);
 
-  const loadCategories = async () => {
-    try {
-      setLoading(true);
-      
-      // Homepage category order from mockData.ts
-      const homepageOrder = [
-        "Vegetables & Fruits",
-        "Atta, Rice & Dal",
-        "Oil, Ghee & Masala",
-        "Dairy, Bread & Eggs",
-        "Bakery & Biscuits",
-        "Dry Fruits & Cereals",
-        "Chicken, Meat & Fish",
-        "Kitchenware & Appliances",
-        "Chips & Namkeen",
-        "Sweets & Chocolates",
-        "Drinks & Juices",
-        "Tea, Coffee & Milk Drinks",
-        "Instant Food",
-        "Sauces & Spreads",
-        "Paan Corner",
-        "Cakes",
-        "Bath & Body",
-        "Hair",
-        "Skin & Face",
-        "Beauty & Cosmetics",
-        "Feminine Hygiene",
-        "Baby Care",
-        "Health & Pharma",
-        "Sexual Wellness"
-      ];
-      
-      // First try to order by order_number to check if column exists
-      const { data, error } = await supabase
+  // Check if order_number column exists
+  useEffect(() => {
+    const checkOrderColumn = async () => {
+      const { error } = await supabase
         .from('categories')
-        .select('*')
-        .order('order_number', { ascending: true });
+        .select('order_number')
+        .limit(1);
       
-      if (error && error.code === '42703') {
-        // Column doesn't exist, fallback to fetching all categories
-        console.log('Order column does not exist, using fallback sorting');
-        setHasOrderColumn(false);
-        const { data: fallbackData, error: fallbackError } = await supabase
-          .from('categories')
-          .select('*');
-        
-        if (fallbackError) {
-          console.error('Error loading categories:', fallbackError);
-          toast({
-            title: "Error",
-            description: "Failed to load categories",
-            variant: "destructive",
-          });
-        } else {
-          // Sort categories according to homepage order
-          const sortedCategories = (fallbackData || []).sort((a, b) => {
-            const aIndex = homepageOrder.indexOf(a.name);
-            const bIndex = homepageOrder.indexOf(b.name);
-            
-            // If both categories are in homepage order, sort by their position
-            if (aIndex !== -1 && bIndex !== -1) {
-              return aIndex - bIndex;
-            }
-            // If only one is in homepage order, prioritize it
-            if (aIndex !== -1) return -1;
-            if (bIndex !== -1) return 1;
-            // If neither is in homepage order, sort alphabetically
-            return a.name.localeCompare(b.name);
-          });
-          setCategories(sortedCategories);
-        }
-      } else if (error) {
-        console.error('Error loading categories:', error);
-        toast({
-          title: "Error",
-          description: "Failed to load categories",
-          variant: "destructive",
-        });
-      } else {
-        console.log('Order column exists, using order_number sorting');
-        setHasOrderColumn(true);
-        // Sort categories according to homepage order, but also respect order_number
-        const sortedCategories = (data || []).sort((a, b) => {
-          // If both have order_number, use that
-          if (a.order_number && b.order_number) {
-            return a.order_number - b.order_number;
-          }
-          // If only one has order_number, prioritize it
-          if (a.order_number) return -1;
-          if (b.order_number) return 1;
-          
-          // Otherwise, use homepage order
-          const aIndex = homepageOrder.indexOf(a.name);
-          const bIndex = homepageOrder.indexOf(b.name);
-          
-          if (aIndex !== -1 && bIndex !== -1) {
-            return aIndex - bIndex;
-          }
-          if (aIndex !== -1) return -1;
-          if (bIndex !== -1) return 1;
-          return a.name.localeCompare(b.name);
-        });
-        setCategories(sortedCategories);
-      }
-    } catch (error) {
-      console.error('Error loading categories:', error);
-      toast({
-        title: "Error",
-        description: "Failed to load categories",
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
+      setHasOrderColumn(!error || error.code !== '42703');
+    };
+    
+    checkOrderColumn();
+  }, []);
 
   const addCategory = async () => {
     if (!formData.name.trim()) {
@@ -188,7 +86,10 @@ const CategoryManagement = () => {
     }
 
     try {
-      let insertData: any = { name: formData.name.trim() };
+      let insertData: any = { 
+        name: formData.name.trim(),
+        active: formData.active
+      };
 
       if (hasOrderColumn) {
         if (!formData.order_number.trim()) {
@@ -271,9 +172,9 @@ const CategoryManagement = () => {
         description: `Category "${formData.name.trim()}" has been added${hasOrderColumn ? ` at position ${insertData.order_number}` : ''}`,
       });
       
-      setFormData({ name: '', order_number: '' });
+      setFormData({ name: '', order_number: '', active: true });
       setIsAddModalOpen(false);
-      loadCategories();
+      refreshCategories();
     } catch (error) {
       console.error('Error adding category:', error);
       toast({
@@ -295,7 +196,10 @@ const CategoryManagement = () => {
     }
 
     try {
-      let updateData: any = { name: formData.name.trim() };
+      let updateData: any = { 
+        name: formData.name.trim(),
+        active: formData.active
+      };
 
       if (hasOrderColumn && formData.order_number.trim()) {
         const orderNumber = parseInt(formData.order_number);
@@ -337,10 +241,56 @@ const CategoryManagement = () => {
         description: `Category "${formData.name.trim()}" has been updated`,
       });
       
-      setFormData({ name: '', order_number: '' });
+      setFormData({ name: '', order_number: '', active: true });
       setIsEditModalOpen(false);
       setSelectedCategory(null);
-      loadCategories();
+      refreshCategories();
+    } catch (error) {
+      console.error('Error updating category:', error);
+      toast({
+        title: "Error updating category",
+        description: "Failed to update category",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const toggleCategoryStatus = async (category: Category, active: boolean) => {
+    try {
+      // Update the category status
+      const { error: categoryError } = await supabase
+        .from('categories')
+        .update({ active })
+        .eq('id', category.id);
+
+      if (categoryError) {
+        toast({
+          title: "Error updating category",
+          description: categoryError.message,
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // If deactivating the category, also deactivate all its subcategories
+      if (!active) {
+        const { error: subcategoryError } = await supabase
+          .from('subcategories')
+          .update({ active: false })
+          .eq('category', category.name);
+
+        if (subcategoryError) {
+          console.error('Error deactivating subcategories:', subcategoryError);
+          // Don't fail the main operation, just log the error
+        }
+      }
+      
+      toast({
+        title: "Category updated",
+        description: `Category "${category.name}" has been ${active ? 'activated' : 'deactivated'}${!active ? ' (including all subcategories)' : ''}`,
+      });
+      
+      refreshCategories();
     } catch (error) {
       console.error('Error updating category:', error);
       toast({
@@ -376,7 +326,7 @@ const CategoryManagement = () => {
       
       setIsDeleteDialogOpen(false);
       setSelectedCategory(null);
-      loadCategories();
+      refreshCategories();
     } catch (error) {
       console.error('Error deleting category:', error);
       toast({
@@ -428,7 +378,7 @@ const CategoryManagement = () => {
         description: `Category moved ${direction}`,
       });
 
-      loadCategories();
+      refreshCategories();
     } catch (error) {
       console.error('Error moving category:', error);
       toast({
@@ -443,7 +393,8 @@ const CategoryManagement = () => {
     setSelectedCategory(category);
     setFormData({
       name: category.name,
-      order_number: category.order_number?.toString() || ''
+      order_number: category.order_number?.toString() || '',
+      active: category.active !== false
     });
     setIsEditModalOpen(true);
   };
@@ -490,7 +441,7 @@ const CategoryManagement = () => {
           </div>
           <Button 
             onClick={() => {
-              setFormData({ name: '', order_number: '' });
+              setFormData({ name: '', order_number: '', active: true });
               setIsAddModalOpen(true);
             }}
             className="flex items-center gap-2"
@@ -538,7 +489,7 @@ const CategoryManagement = () => {
                 <p className="text-muted-foreground">No categories found</p>
                 <Button 
                   onClick={() => {
-                    setFormData({ name: '', order_number: '' });
+                    setFormData({ name: '', order_number: '', active: true });
                     setIsAddModalOpen(true);
                   }}
                   className="mt-4"
@@ -559,9 +510,10 @@ const CategoryManagement = () => {
                       )}
                     </TableHead>
                     <TableHead>Category Name</TableHead>
-                    <TableHead className="w-[100px]">Status</TableHead>
+                    <TableHead className="w-[100px]">Active</TableHead>
                     <TableHead className="w-[150px]">Created</TableHead>
-                    <TableHead className="w-[200px]">Actions</TableHead>
+                    <TableHead className="w-[80px]">Edit</TableHead>
+                    <TableHead className="w-[100px]">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -624,34 +576,34 @@ const CategoryManagement = () => {
                         </TableCell>
                         <TableCell className="font-medium">{category.name}</TableCell>
                         <TableCell>
-                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                            Active
-                          </span>
+                          <Switch
+                            checked={category.active !== false}
+                            onCheckedChange={(checked) => toggleCategoryStatus(category, checked)}
+                          />
                         </TableCell>
                         <TableCell>
                           {new Date(category.created_at).toLocaleDateString()}
                         </TableCell>
                         <TableCell>
-                          <div className="flex items-center gap-2">
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => openEditModal(category)}
-                              className="flex items-center gap-1"
-                            >
-                              <Edit className="h-4 w-4" />
-                              Edit
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => openDeleteDialog(category)}
-                              className="flex items-center gap-1 text-red-600 hover:text-red-700"
-                            >
-                              <Trash2 className="h-4 w-4" />
-                              Delete
-                            </Button>
-                          </div>
+                          <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            onClick={() => openEditModal(category)}
+                            className="h-8 w-8 p-0"
+                          >
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                        </TableCell>
+                        <TableCell>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => openDeleteDialog(category)}
+                            className="flex items-center gap-1 text-red-600 hover:text-red-700"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                            Delete
+                          </Button>
                         </TableCell>
                       </TableRow>
                     );
@@ -699,12 +651,20 @@ const CategoryManagement = () => {
                   </p>
                 </div>
               )}
+              <div className="flex items-center space-x-2">
+                <Switch
+                  id="categoryActive"
+                  checked={formData.active}
+                  onCheckedChange={(checked) => setFormData({ ...formData, active: checked })}
+                />
+                <Label htmlFor="categoryActive">Active</Label>
+              </div>
             </div>
             
             <DialogFooter>
               <Button variant="outline" onClick={() => {
                 setIsAddModalOpen(false);
-                setFormData({ name: '', order_number: '' });
+                setFormData({ name: '', order_number: '', active: true });
               }}>
                 Cancel
               </Button>
@@ -752,12 +712,20 @@ const CategoryManagement = () => {
                   </p>
                 </div>
               )}
+              <div className="flex items-center space-x-2">
+                <Switch
+                  id="editCategoryActive"
+                  checked={formData.active}
+                  onCheckedChange={(checked) => setFormData({ ...formData, active: checked })}
+                />
+                <Label htmlFor="editCategoryActive">Active</Label>
+              </div>
             </div>
             
             <DialogFooter>
               <Button variant="outline" onClick={() => {
                 setIsEditModalOpen(false);
-                setFormData({ name: '', order_number: '' });
+                setFormData({ name: '', order_number: '', active: true });
                 setSelectedCategory(null);
               }}>
                 Cancel

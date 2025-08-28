@@ -5,11 +5,12 @@ export interface Category {
   id: string;
   name: string;
   order_number?: number;
+  active?: boolean;
   created_at: string;
   updated_at: string;
 }
 
-export const useCategories = () => {
+export const useCategories = (includeInactive: boolean = false) => {
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -20,16 +21,30 @@ export const useCategories = () => {
       setError(null);
       
       // First try to order by order_number to check if column exists
-      const { data, error } = await supabase
+      let query = supabase
         .from('categories')
-        .select('*')
+        .select('*');
+      
+      // Filter by active status unless includeInactive is true
+      if (!includeInactive) {
+        query = query.eq('active', true);
+      }
+      
+      const { data, error } = await query
         .order('order_number', { ascending: true });
       
       if (error && error.code === '42703') {
         // Column doesn't exist, fallback to ordering by name
-        const { data: fallbackData, error: fallbackError } = await supabase
+        let fallbackQuery = supabase
           .from('categories')
-          .select('*')
+          .select('*');
+        
+        // Filter by active status unless includeInactive is true
+        if (!includeInactive) {
+          fallbackQuery = fallbackQuery.eq('active', true);
+        }
+        
+        const { data: fallbackData, error: fallbackError } = await fallbackQuery
           .order('name', { ascending: true });
         
         if (fallbackError) {
