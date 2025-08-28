@@ -136,7 +136,7 @@ const Admin = () => {
 
   const [newCategoryData, setNewCategoryData] = useState({
     name: '',
-    image: ''
+    order_number: ''
   });
   const [newSubcategoryData, setNewSubcategoryData] = useState({
     category: '',
@@ -190,15 +190,32 @@ const Admin = () => {
   };
 
   const loadCategories = async () => {
-    const { data, error } = await supabase
-      .from('categories')
-      .select('*')
-      .order('name');
-    
-    if (error) {
-      // Error handled silently in production
-    } else {
-      setDbCategories(data || []);
+    try {
+      // First try to order by order_number
+      const { data, error } = await supabase
+        .from('categories')
+        .select('*')
+        .order('order_number', { ascending: true });
+      
+      if (error && error.code === '42703') {
+        // Column doesn't exist, fallback to ordering by name
+        const { data: fallbackData, error: fallbackError } = await supabase
+          .from('categories')
+          .select('*')
+          .order('name', { ascending: true });
+        
+        if (fallbackError) {
+          console.error('Error loading categories:', fallbackError);
+        } else {
+          setDbCategories(fallbackData || []);
+        }
+      } else if (error) {
+        console.error('Error loading categories:', error);
+      } else {
+        setDbCategories(data || []);
+      }
+    } catch (error) {
+      console.error('Error loading categories:', error);
     }
   };
 
@@ -304,45 +321,121 @@ const Admin = () => {
   const addCategory = async () => {
     if (!newCategoryData.name.trim()) {
       toast({
-        title: "Invalid category name",
+        title: "Invalid data",
         description: "Please enter a valid category name",
         variant: "destructive",
       });
       return;
     }
 
-    const { error } = await supabase
-      .from('categories')
-      .insert([{
-        name: newCategoryData.name.trim(),
-        image: newCategoryData.image.trim() || null
-      }]);
+    try {
+      // Check if order_number column exists by trying to fetch categories with order_number
+      const { data: testCategories } = await supabase
+        .from('categories')
+        .select('order_number')
+        .limit(1);
 
-    if (error) {
-      if (error.code === '23505') { // Unique constraint violation
-        toast({
-          title: "Category exists",
-          description: "This category already exists",
-          variant: "destructive",
-        });
+      const hasOrderColumn = testCategories && testCategories.length > 0 && 
+        testCategories[0].hasOwnProperty('order_number');
+
+      let insertData = { name: newCategoryData.name.trim() };
+
+      if (hasOrderColumn) {
+        // Order number validation only if column exists
+        if (!newCategoryData.order_number.trim()) {
+          toast({
+            title: "Invalid data",
+            description: "Please enter a valid order number",
+            variant: "destructive",
+          });
+          return;
+        }
+
+        const orderNumber = parseInt(newCategoryData.order_number);
+        if (isNaN(orderNumber) || orderNumber < 1) {
+          toast({
+            title: "Invalid order number",
+            description: "Order number must be a positive integer",
+            variant: "destructive",
+          });
+          return;
+        }
+
+        // Check if order number already exists and auto-rearrange if needed
+        const { data: existingCategory } = await supabase
+          .from('categories')
+          .select('id, order_number')
+          .eq('order_number', orderNumber)
+          .single();
+
+        if (existingCategory) {
+          // Shift all categories with order_number >= new order_number by +1
+          const { error: shiftError } = await supabase.rpc('shift_category_orders', {
+            start_order: orderNumber
+          });
+
+          if (shiftError) {
+            // Fallback: manually shift orders
+            const { data: categoriesToShift } = await supabase
+              .from('categories')
+              .select('id, order_number')
+              .gte('order_number', orderNumber)
+              .order('order_number', { ascending: false });
+
+            if (categoriesToShift) {
+              for (const cat of categoriesToShift) {
+                await supabase
+                  .from('categories')
+                  .update({ order_number: cat.order_number + 1 })
+                  .eq('id', cat.id);
+              }
+            }
+          }
+        }
+
+        insertData.order_number = orderNumber;
       } else {
-        toast({
-          title: "Error adding category",
-          description: error.message,
-          variant: "destructive",
-        });
+        // If order_number column doesn't exist, show a warning but still allow category creation
+        console.warn('order_number column not found in categories table. Please add it manually.');
       }
-      return;
+
+      const { error } = await supabase
+        .from('categories')
+        .insert([insertData]);
+
+      if (error) {
+        if (error.code === '23505') { // Unique constraint violation
+          toast({
+            title: "Category exists",
+            description: "This category name already exists",
+            variant: "destructive",
+          });
+        } else {
+          toast({
+            title: "Error adding category",
+            description: error.message,
+            variant: "destructive",
+          });
+        }
+        return;
+      }
+      
+      toast({
+        title: "Category added",
+        description: `Category "${newCategoryData.name.trim()}" has been added${hasOrderColumn ? ` at position ${insertData.order_number}` : ''}`,
+      });
+      
+      setNewCategoryData({ name: '', order_number: '' });
+      setIsCategoryModalOpen(false);
+      loadCategories();
+    } catch (error) {
+      console.error('Error adding category:', error);
+      toast({
+        title: "Error adding category",
+        description: "Failed to add category",
+        variant: "destructive",
+      });
     }
-    
-    toast({
-      title: "Category added",
-      description: `Category "${newCategoryData.name.trim()}" has been added successfully`,
-    });
-    
-    setNewCategoryData({ name: '', image: '' });
-    setIsCategoryModalOpen(false);
-    loadCategories();
   };
 
   // Add new subcategory
@@ -656,12 +749,12 @@ const Admin = () => {
               Edit Banner
             </Button>
             <Button 
-              onClick={() => setIsCategoryModalOpen(true)} 
+              onClick={() => navigate('/admin/categories')} 
               variant="outline" 
               className="flex items-center gap-2"
             >
-              <Plus className="h-4 w-4" />
-              Add Category
+              <Edit className="h-4 w-4" />
+              Edit Category
             </Button>
             <Button 
               onClick={() => setIsSubcategoryModalOpen(true)} 
@@ -1206,20 +1299,27 @@ const Admin = () => {
                 />
               </div>
               <div>
-                <Label htmlFor="categoryImage">Category Image URL (optional)</Label>
+                <Label htmlFor="categoryOrder">Order Number (optional)</Label>
                 <Input
-                  id="categoryImage"
-                  value={newCategoryData.image}
-                  onChange={(e) => setNewCategoryData({ ...newCategoryData, image: e.target.value })}
-                  placeholder="Enter image URL"
+                  id="categoryOrder"
+                  type="number"
+                  min="1"
+                  value={newCategoryData.order_number}
+                  onChange={(e) => setNewCategoryData({ ...newCategoryData, order_number: e.target.value })}
+                  placeholder="Enter order number (1, 2, 3...)"
                 />
+                <p className="text-sm text-gray-500 mt-1">
+                  This determines the position of the category on the home page. If the order number already exists, other categories will be automatically rearranged.
+                  <br />
+                  <span className="text-amber-600">Note: Order functionality requires database setup. Categories will be ordered by name if order numbers are not available.</span>
+                </p>
               </div>
             </div>
             
             <DialogFooter>
               <Button variant="outline" onClick={() => {
                 setIsCategoryModalOpen(false);
-                setNewCategoryData({ name: '', image: '' });
+                setNewCategoryData({ name: '', order_number: '' });
               }}>
                 Cancel
               </Button>

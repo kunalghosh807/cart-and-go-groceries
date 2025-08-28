@@ -2,9 +2,13 @@ import React from 'react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import CategoryCard from '@/components/CategoryCard';
-import { categories } from '@/data/mockData';
+import { categories as mockCategories } from '@/data/mockData';
+import { useProducts } from '@/hooks/useProducts';
+import { useCategories } from '@/hooks/useCategories';
 
 const Categories = () => {
+  const { getProductsByCategory } = useProducts();
+  const { categories, loading: categoriesLoading } = useCategories();
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
@@ -16,15 +20,31 @@ const Categories = () => {
         </div>
         
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-          {categories.map((category) => (
-            <CategoryCard
-              key={category.id}
-              id={category.id}
-              name={category.name}
-              image={category.image}
-              productCount={category.productCount}
-            />
-          ))}
+          {categoriesLoading ? (
+            <div className="col-span-full text-center py-8">
+              <p className="text-muted-foreground">Loading categories...</p>
+            </div>
+          ) : categories.length > 0 ? (
+            categories.map((category) => (
+              <CategoryCard 
+                key={category.id}
+                id={category.id}
+                name={category.name} 
+                image="/placeholder.svg"
+                productCount={0}
+              />
+            ))
+          ) : (
+            mockCategories.map((category) => (
+              <CategoryCard 
+                key={category.id}
+                id={category.id}
+                name={category.name} 
+                image={category.image} 
+                productCount={category.productCount} 
+              />
+            ))
+          )}
         </div>
       </main>
       
