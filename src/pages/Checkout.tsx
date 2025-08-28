@@ -52,7 +52,7 @@ const Checkout = () => {
     return new Promise((resolve, reject) => {
       // Check if Razorpay is already loaded
       if (typeof (window as any).Razorpay !== 'undefined') {
-        console.log('Razorpay already loaded');
+
         resolve(true);
         return;
       }
@@ -60,21 +60,17 @@ const Checkout = () => {
       // Check if script is already being loaded
       const existingScript = document.querySelector('script[src="https://checkout.razorpay.com/v1/checkout.js"]');
       if (existingScript) {
-        console.log('Razorpay script already exists, waiting for load');
         existingScript.addEventListener('load', () => {
-          console.log('Existing Razorpay script loaded');
           resolve(true);
         });
         existingScript.addEventListener('error', () => reject(new Error('Failed to load Razorpay script')));
         return;
       }
 
-      console.log('Loading Razorpay script...');
       const script = document.createElement('script');
       script.src = 'https://checkout.razorpay.com/v1/checkout.js';
       script.async = true;
       script.onload = () => {
-        console.log('Razorpay script loaded successfully');
         // Wait a bit more to ensure Razorpay is fully initialized
         setTimeout(() => resolve(true), 200);
       };
@@ -104,7 +100,7 @@ const Checkout = () => {
       // Get Razorpay key from environment
       const keyId = import.meta.env.VITE_RAZORPAY_KEY_ID;
       
-      console.log('Razorpay Key ID:', keyId ? 'Configured' : 'Not configured');
+  
       
       if (!keyId) {
         console.error('Razorpay key not found in environment variables');
@@ -120,7 +116,7 @@ const Checkout = () => {
       const amount = Math.round(totalAmount * 100); // Convert to paise
       const currency = 'INR';
 
-      console.log('Payment details:', { amount, currency, keyId });
+  
 
       // Declare timeout variable for modal handling
       let modalTimeout: NodeJS.Timeout;
@@ -133,7 +129,7 @@ const Checkout = () => {
         name: 'Cart & Go Groceries',
         description: 'Order Payment',
         handler: function (response: any) {
-          console.log('Payment successful:', response);
+  
           clearTimeout(modalTimeout);
           // Save order to database with address
           saveOrder(response, selectedAddress);
@@ -152,14 +148,14 @@ const Checkout = () => {
         },
         modal: {
           ondismiss: function() {
-            console.log('Payment modal dismissed by user - resetting processing state');
+    
             clearTimeout(modalTimeout);
             setIsProcessing(false);
           }
         }
       };
 
-      console.log('Creating Razorpay instance with options:', options);
+
       
       // Create and open Razorpay checkout
       const rzp = new (window as any).Razorpay(options);
@@ -172,19 +168,15 @@ const Checkout = () => {
         setIsProcessing(false);
       });
 
-      // Add modal open/close event listeners for debugging
       rzp.on('payment.submit', function(response: any) {
-        console.log('Payment submitted:', response);
+        
       });
 
       rzp.on('payment.cancel', function(response: any) {
-        console.log('Payment cancelled:', response);
+        
         setIsProcessing(false);
       });
 
-      // Open the payment modal with a small delay
-      console.log('Opening Razorpay payment modal...');
-      
       // Set a timeout to reset processing state if modal doesn't open properly
       modalTimeout = setTimeout(() => {
         console.warn('Modal timeout - resetting processing state');
@@ -193,10 +185,8 @@ const Checkout = () => {
       }, 5000); // 5 second timeout
       
       // Open the payment modal immediately
-      console.log('Opening Razorpay payment modal...');
       try {
         rzp.open();
-        console.log('Modal open command executed');
       } catch (modalError) {
         console.error('Error opening modal:', modalError);
         clearTimeout(modalTimeout);

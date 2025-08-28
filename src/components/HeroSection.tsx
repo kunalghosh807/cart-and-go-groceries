@@ -135,13 +135,12 @@ const HeroSection = () => {
       >
         <CarouselContent className="h-full">
           {banners.map((banner, index) => (
-            <CarouselItem key={index} className="h-full">
+            <CarouselItem key={index} className="h-full basis-full min-w-0">
               <div className="relative h-full">
                 {/* Background Media with Ken Burns Effect */}
                 {banner.video_url ? (
                   <video
-                    className="absolute inset-0 w-full h-full object-cover animate-[ken-burns_20s_ease-in-out_infinite]"
-                    style={{ transform: 'scale(1.1)' }}
+                    className="absolute inset-0 w-full h-full object-cover"
                     autoPlay
                     muted
                     loop
@@ -151,10 +150,9 @@ const HeroSection = () => {
                   </video>
                 ) : (
                   <div 
-                    className="absolute inset-0 bg-cover bg-center bg-no-repeat animate-[ken-burns_20s_ease-in-out_infinite]"
+                    className="absolute inset-0 bg-cover bg-center bg-no-repeat"
                     style={{
                       backgroundImage: `url(${banner.image_url})`,
-                      transform: 'scale(1.1)',
                     }}
                   />
                 )}

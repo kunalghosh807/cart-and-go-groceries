@@ -69,7 +69,22 @@ export const useCategories = (includeInactive: boolean = false) => {
 
   useEffect(() => {
     loadCategories();
-  }, []);
+    
+    // Set up real-time subscription for categories
+    const categoriesChannel = supabase
+      .channel('categories-changes')
+      .on('postgres_changes', 
+        { event: '*', schema: 'public', table: 'categories' },
+        () => {
+          loadCategories();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(categoriesChannel);
+    };
+  }, [includeInactive]);
 
   const refreshCategories = () => {
     loadCategories();

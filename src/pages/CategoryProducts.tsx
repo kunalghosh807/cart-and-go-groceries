@@ -9,81 +9,65 @@ import { useNavigate } from 'react-router-dom';
 import { useProducts } from '@/hooks/useProducts';
 import { supabase } from '@/integrations/supabase/client';
 import { useState, useEffect } from 'react';
+import { useCategories } from '@/hooks/useCategories';
 
 const CategoryProducts = () => {
   const { categoryId } = useParams();
   const navigate = useNavigate();
-  const { products: allProducts, loading } = useProducts();
+  const { getProductsByCategory } = useProducts();
+  const { categories } = useCategories();
   const [categoryName, setCategoryName] = useState<string>('');
   const [products, setProducts] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const loadCategoryAndProducts = async () => {
-      if (!categoryId) return;
-
-      // Convert categoryId slug to category name first
-      const convertedName = categoryId.split('-').map(word => 
-        word.charAt(0).toUpperCase() + word.slice(1)
-      ).join(' ');
-      
-      // Handle special cases for category name conversion
-      let categoryNameToQuery = convertedName;
-      if (categoryId === 'vegetables-fruits') {
-        categoryNameToQuery = 'Vegetables & Fruits';
+      if (!categoryId) {
+        setLoading(false);
+        return;
       }
-      
-      // Try to find the category in the database by name
-      const { data: dbCategories } = await supabase
-        .from('categories')
-        .select('*')
-        .eq('name', categoryNameToQuery);
 
-      if (dbCategories && dbCategories.length > 0) {
-        // Found in database - use the actual category name
-        const category = dbCategories[0];
+      setLoading(true);
+      
+      // Find the category by ID in our categories list
+      const category = categories.find(cat => cat.id === categoryId);
+      
+      if (category) {
         setCategoryName(category.name);
-        // Filter products by this exact category name
-        const categoryProducts = allProducts.filter(p => 
-          p.category.toLowerCase() === category.name.toLowerCase()
-        );
+        // Use the new getProductsByCategory function with category_id
+        const categoryProducts = await getProductsByCategory(category.id);
         setProducts(categoryProducts);
       } else {
-        // Fallback to mock data conversion for existing routes
-        setCategoryName(convertedName);
+        // Fallback: try to find category by converting slug to name
+        const convertedName = categoryId.split('-').map(word => 
+          word.charAt(0).toUpperCase() + word.slice(1)
+        ).join(' ');
         
-        // Try multiple variations to match products
-        const possibleNames = [
-          convertedName,
-          convertedName.replace('&', 'and'),
-          convertedName.split(' ')[0], // First word only
-          convertedName.split(' ').slice(0, 2).join(' ') // First two words
-        ];
-        
-        // First try to match by category
-        let categoryProducts = allProducts.filter(p => 
-          possibleNames.some(name => 
-            p.category.toLowerCase().includes(name.toLowerCase()) ||
-            name.toLowerCase().includes(p.category.toLowerCase())
-          )
-        );
-        
-        // If no products found by category, try to match by subcategory
-        if (categoryProducts.length === 0) {
-          categoryProducts = allProducts.filter(p => 
-            p.subcategory && // Only include products that actually have a subcategory
-            possibleNames.some(name => 
-              p.subcategory?.toLowerCase().includes(name.toLowerCase()) ||
-              name.toLowerCase().includes(p.subcategory?.toLowerCase() || '')
-            )
-          );
+        // Handle special cases for category name conversion
+        let categoryNameToQuery = convertedName;
+        if (categoryId === 'vegetables-fruits') {
+          categoryNameToQuery = 'Vegetables & Fruits';
         }
         
-        setProducts(categoryProducts);
+        const foundCategory = categories.find(cat => 
+          cat.name.toLowerCase() === categoryNameToQuery.toLowerCase()
+        );
+        
+        if (foundCategory) {
+          setCategoryName(foundCategory.name);
+          const categoryProducts = await getProductsByCategory(foundCategory.id);
+          setProducts(categoryProducts);
+        } else {
+          setCategoryName(convertedName);
+          setProducts([]);
+        }
       }
+      
+      setLoading(false);
     };
 
     loadCategoryAndProducts();
-  }, [categoryId, allProducts]);
+  }, [categoryId, categories, getProductsByCategory]);
   
   if (!categoryId) {
     return (

@@ -12,7 +12,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
-import { ArrowLeft, Plus, Edit, Trash2, ArrowUp, ArrowDown } from 'lucide-react';
+import { ArrowLeft, Plus, Edit, Trash2, ArrowUp, ArrowDown, Search, Package } from 'lucide-react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 
@@ -42,6 +42,7 @@ const CategoryManagement = () => {
     order_number: '',
     active: true
   });
+  const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
     if (!user) {
@@ -272,22 +273,34 @@ const CategoryManagement = () => {
         return;
       }
 
-      // If deactivating the category, also deactivate all its subcategories
+      // Handle subcategories based on category status
       if (!active) {
+        // If deactivating the category, also deactivate all its subcategories
         const { error: subcategoryError } = await supabase
           .from('subcategories')
           .update({ active: false })
-          .eq('category', category.name);
+          .eq('category_id', category.id);
 
         if (subcategoryError) {
           console.error('Error deactivating subcategories:', subcategoryError);
+          // Don't fail the main operation, just log the error
+        }
+      } else {
+        // If activating the category, also activate all its subcategories
+        const { error: subcategoryError } = await supabase
+          .from('subcategories')
+          .update({ active: true })
+          .eq('category_id', category.id);
+
+        if (subcategoryError) {
+          console.error('Error activating subcategories:', subcategoryError);
           // Don't fail the main operation, just log the error
         }
       }
       
       toast({
         title: "Category updated",
-        description: `Category "${category.name}" has been ${active ? 'activated' : 'deactivated'}${!active ? ' (including all subcategories)' : ''}`,
+        description: `Category "${category.name}" has been ${active ? 'activated' : 'deactivated'} (including all subcategories)`,
       });
       
       refreshCategories();
@@ -479,9 +492,33 @@ const CategoryManagement = () => {
           </Card>
         )}
 
+        {/* Search Bar */}
+        <Card className="mb-6">
+          <CardContent className="pt-6">
+            <div className="flex items-center gap-4">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Search categories..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <Package className="h-4 w-4" />
+                {categories.filter(category => 
+                  category.name.toLowerCase().includes(searchTerm.toLowerCase())
+                ).length} categories
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Categories Table */}
         <Card>
           <CardHeader>
-            <CardTitle>Categories ({categories.length})</CardTitle>
+            <CardTitle>Categories</CardTitle>
           </CardHeader>
           <CardContent>
             {categories.length === 0 ? (
@@ -517,7 +554,9 @@ const CategoryManagement = () => {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {categories.map((category, index) => {
+                  {categories.filter(category => 
+                    category.name.toLowerCase().includes(searchTerm.toLowerCase())
+                  ).map((category, index) => {
                     // Current homepage category order based on actual database categories
                     const homepageOrder = [
                       "Beauty & Personal Care",

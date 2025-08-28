@@ -7,13 +7,14 @@ import CategoryCard from '@/components/CategoryCard';
 import Footer from '@/components/Footer';
 import { Button } from '@/components/ui/button';
 import { ChevronRight } from 'lucide-react';
-import { categories } from '@/data/mockData';
 import { useProducts } from '@/hooks/useProducts';
 import { useCategories } from '@/hooks/useCategories';
+import { useSubcategories } from '@/hooks/useSubcategories';
 
 const Index = () => {
   const { featuredProducts, dealProducts, loading, getProductsByCategory } = useProducts();
   const { categories: dbCategories, loading: categoriesLoading } = useCategories();
+  const { subcategories, loading: subcategoriesLoading } = useSubcategories();
 
   // Get sorted database categories for ordering sections
   const sortedDbCategories = [...dbCategories].sort((a, b) => {
@@ -33,22 +34,17 @@ const Index = () => {
     
     sortedDbCategories.forEach((category) => {
       // Handle each category based on its exact database name and order
-      if (category.name === 'Grocerry & Kitchen') {
-        // Display as "Grocery & Kitchen" for better UX
-        sections.push({ type: 'category', name: 'Grocery & Kitchen', dbCategory: category });
-      } else if (category.name === 'Featured Products') {
+      if (category.name === 'Featured Products') {
         // Special featured products section
         sections.push({ type: 'featured', dbCategory: category });
-      } else if (category.name === 'Snacks & Drinks') {
-        sections.push({ type: 'category', name: 'Snacks & Drinks', dbCategory: category });
-      } else if (category.name === 'Beauty & Personal C') {
-        // Display as full name for better UX
-        sections.push({ type: 'category', name: 'Beauty & Personal Care', dbCategory: category });
       } else if (category.name === "Today's Deals") {
         // Special deals section
         sections.push({ type: 'deals', dbCategory: category });
+      } else if (category.name === 'Grocerry & Kitchen' || category.name === 'Snacks & Drinks' || category.name === 'Beauty & Personal Care' || category.name === 'Beauty & Personal C') {
+        // Main category sections - use exact database name
+        sections.push({ type: 'category', name: category.name, dbCategory: category });
       } else {
-        // For other categories like "Kunal", "Dipa", show them as custom sections
+        // For other categories, show them as custom sections with exact database name
         sections.push({ type: 'custom', name: category.name, dbCategory: category });
       }
     });
@@ -74,28 +70,10 @@ const Index = () => {
           ) : (
             sectionOrder.map((section, index) => {
               if (section.type === 'category') {
-                // Main category sections with subcategories
-                const categorySubcategories = categories.filter(mockCat => {
-                  if (section.name === 'Grocery & Kitchen') {
-                    return mockCat.name.includes('Vegetables') || mockCat.name.includes('Atta') || 
-                           mockCat.name.includes('Oil') || mockCat.name.includes('Dairy') ||
-                           mockCat.name.includes('Bakery') || mockCat.name.includes('Dry') ||
-                           mockCat.name.includes('Chicken') || mockCat.name.includes('Kitchen');
-                  }
-                  if (section.name === 'Snacks & Drinks') {
-                    return mockCat.name.includes('Chips') || mockCat.name.includes('Sweets') ||
-                           mockCat.name.includes('Drinks') || mockCat.name.includes('Tea') ||
-                           mockCat.name.includes('Instant') || mockCat.name.includes('Sauces') ||
-                           mockCat.name.includes('Paan') || mockCat.name.includes('Cakes');
-                  }
-                  if (section.name === 'Beauty & Personal Care') {
-                    return mockCat.name.includes('Bath') || mockCat.name.includes('Hair') ||
-                           mockCat.name.includes('Skin') || mockCat.name.includes('Beauty') ||
-                           mockCat.name.includes('Feminine') || mockCat.name.includes('Baby') ||
-                           mockCat.name.includes('Health') || mockCat.name.includes('Sexual');
-                  }
-                  return false;
-                });
+                // Main category sections with subcategories from database
+                const categorySubcategories = subcategories.filter(subcat => 
+                  subcat.category_id === section.dbCategory.id
+                );
                 
                 return (
                   <section key={`category-${section.dbCategory.id}`} className="mb-12">
@@ -106,22 +84,36 @@ const Index = () => {
                       </Button>
                     </div>
                     <div className="grid grid-cols-4 gap-3">
-                      {categorySubcategories.slice(0, 8).map((subcat) => (
-                        <CategoryCard 
-                          key={subcat.id}
-                          id={subcat.id}
-                          name={subcat.name} 
-                          image={subcat.image} 
-                          productCount={subcat.productCount} 
-                        />
-                      ))}
+                      {subcategoriesLoading ? (
+                        <div className="col-span-4 text-center py-4 text-muted-foreground">
+                          Loading subcategories...
+                        </div>
+                      ) : categorySubcategories.length > 0 ? (
+                        categorySubcategories.slice(0, 8).map((subcat) => (
+                          <CategoryCard 
+                            key={subcat.id}
+                            id={subcat.id}
+                            name={subcat.name} 
+                            image={subcat.image || '/placeholder.svg'} 
+                            productCount={0} 
+                          />
+                        ))
+                      ) : (
+                        <div className="col-span-4 text-center py-4 text-muted-foreground">
+                          No subcategories available for {section.name}
+                        </div>
+                      )}
                     </div>
                   </section>
                 );
               }
               
               if (section.type === 'custom') {
-                // Custom categories like "Kunal"
+                // Custom categories like "Kunal" - fetch and display subcategories
+                const categorySubcategories = subcategories.filter(subcat => 
+                  subcat.category_id === section.dbCategory.id
+                );
+                
                 return (
                   <section key={`custom-${section.dbCategory.id}`} className="mb-12">
                     <div className="flex items-center justify-between mb-6">
@@ -130,8 +122,26 @@ const Index = () => {
                         View All <ChevronRight className="h-4 w-4 ml-1" />
                       </Button>
                     </div>
-                    <div className="text-center py-8 text-muted-foreground">
-                      No subcategories available for {section.name}
+                    <div className="grid grid-cols-4 gap-3">
+                      {subcategoriesLoading ? (
+                        <div className="col-span-4 text-center py-4 text-muted-foreground">
+                          Loading subcategories...
+                        </div>
+                      ) : categorySubcategories.length > 0 ? (
+                        categorySubcategories.slice(0, 8).map((subcat) => (
+                          <CategoryCard 
+                            key={subcat.id}
+                            id={subcat.id}
+                            name={subcat.name} 
+                            image={subcat.image || '/placeholder.svg'} 
+                            productCount={0} 
+                          />
+                        ))
+                      ) : (
+                        <div className="col-span-4 text-center py-4 text-muted-foreground">
+                          No subcategories available for {section.name}
+                        </div>
+                      )}
                     </div>
                   </section>
                 );

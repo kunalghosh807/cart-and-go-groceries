@@ -164,13 +164,10 @@ export const AddressSelection: React.FC<AddressSelectionProps> = ({
           <RadioGroup
             value={selectedAddressId}
             onValueChange={(value) => {
-              console.log('Address selection changed:', value);
               const address = addresses.find(addr => addr.id === value);
-              console.log('Found address:', address);
-              if (address) {
-                onAddressSelect(address);
-                console.log('Address selected successfully');
-              }
+    if (address) {
+      onAddressSelect(address);
+    }
             }}
             className="space-y-4"
           >
@@ -181,7 +178,7 @@ export const AddressSelection: React.FC<AddressSelectionProps> = ({
                   selectedAddressId === address.id ? 'ring-2 ring-blue-500 bg-blue-50' : 'hover:bg-gray-50'
                 }`}
                 onClick={() => {
-                  console.log('Card clicked for address:', address.id);
+            
                   onAddressSelect(address);
                 }}
               >

@@ -41,12 +41,34 @@ export const useProducts = () => {
     loadProducts();
   }, []);
 
-  const getProductsByCategory = (category: string) => {
-    return products.filter(p => p.category.toLowerCase() === category.toLowerCase());
+  const getProductsByCategory = async (categoryId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('products')
+        .select('*')
+        .eq('category_id', categoryId);
+      
+      if (error) throw error;
+      return data || [];
+    } catch (error) {
+      console.error('Error fetching products by category:', error);
+      return [];
+    }
   };
 
-  const getProductsBySubcategory = (subcategory: string) => {
-    return products.filter(p => p.subcategory?.toLowerCase() === subcategory.toLowerCase());
+  const getProductsBySubcategory = async (subcategoryId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('products')
+        .select('*')
+        .eq('subcategory_id', subcategoryId);
+      
+      if (error) throw error;
+      return data || [];
+    } catch (error) {
+      console.error('Error fetching products by subcategory:', error);
+      return [];
+    }
   };
 
   const searchProducts = (query: string) => {

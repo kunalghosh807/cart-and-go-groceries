@@ -313,7 +313,7 @@ const Admin = () => {
     const categoryFromDb = dbCategories.find(cat => cat.name === category);
     if (!categoryFromDb) return [];
     return dbSubcategories
-      .filter(sub => sub.categories?.name === category)
+      .filter(sub => sub.category_id === categoryFromDb.id)
       .map(sub => sub.name);
   };
 
@@ -757,12 +757,12 @@ const Admin = () => {
               Edit Category
             </Button>
             <Button 
-              onClick={() => setIsSubcategoryModalOpen(true)} 
+              onClick={() => navigate('/admin/subcategories')} 
               variant="outline" 
               className="flex items-center gap-2"
             >
-              <Plus className="h-4 w-4" />
-              Add Sub Category
+              <Edit className="h-4 w-4" />
+              Edit Subcategory
             </Button>
             <Button onClick={openAddModal} className="flex items-center gap-2">
               <Plus className="h-4 w-4" />

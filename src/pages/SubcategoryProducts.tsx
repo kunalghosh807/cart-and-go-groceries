@@ -7,57 +7,63 @@ import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
 import { useProducts } from '@/hooks/useProducts';
 import { supabase } from '@/integrations/supabase/client';
+import { useSubcategories } from '@/hooks/useSubcategories';
 
 const SubcategoryProducts = () => {
   const { categoryId, subcategoryId } = useParams();
   const navigate = useNavigate();
-  const { products: allProducts, loading } = useProducts();
+  const { getProductsBySubcategory } = useProducts();
+  const { subcategories } = useSubcategories();
   const [subcategoryName, setSubcategoryName] = useState<string>('');
   const [categoryName, setCategoryName] = useState<string>('');
   const [products, setProducts] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const loadSubcategoryAndProducts = async () => {
-      if (!subcategoryId) return;
+      if (!subcategoryId) {
+        setLoading(false);
+        return;
+      }
 
-      // Try to find the subcategory in the database
-      const { data: dbSubcategories } = await supabase
-        .from('subcategories')
-        .select(`
-          *,
-          categories (
-            id,
-            name
-          )
-        `)
-        .eq('id', subcategoryId);
-
-      if (dbSubcategories && dbSubcategories.length > 0) {
-        const subcategory = dbSubcategories[0];
+      setLoading(true);
+      
+      // Find the subcategory by ID in our subcategories list
+      const subcategory = subcategories.find(sub => sub.id === subcategoryId);
+      
+      if (subcategory) {
         setSubcategoryName(subcategory.name);
         setCategoryName(subcategory.categories?.name || '');
         
-        // Filter products by this exact subcategory name
-        const subcategoryProducts = allProducts.filter(p => 
-          p.subcategory?.toLowerCase() === subcategory.name.toLowerCase()
-        );
+        // Use the new getProductsBySubcategory function with subcategory_id
+        const subcategoryProducts = await getProductsBySubcategory(subcategory.id);
         setProducts(subcategoryProducts);
       } else {
-        // Fallback to converted name
+        // Fallback: try to find subcategory by converting slug to name
         const convertedName = subcategoryId.split('-').map(word => 
           word.charAt(0).toUpperCase() + word.slice(1)
         ).join(' ');
-        setSubcategoryName(convertedName);
         
-        const subcategoryProducts = allProducts.filter(p => 
-          p.subcategory?.toLowerCase() === convertedName.toLowerCase()
+        const foundSubcategory = subcategories.find(sub => 
+          sub.name.toLowerCase() === convertedName.toLowerCase()
         );
-        setProducts(subcategoryProducts);
+        
+        if (foundSubcategory) {
+          setSubcategoryName(foundSubcategory.name);
+          setCategoryName(foundSubcategory.categories?.name || '');
+          const subcategoryProducts = await getProductsBySubcategory(foundSubcategory.id);
+          setProducts(subcategoryProducts);
+        } else {
+          setSubcategoryName(convertedName);
+          setProducts([]);
+        }
       }
+      
+      setLoading(false);
     };
 
     loadSubcategoryAndProducts();
-  }, [subcategoryId, allProducts]);
+  }, [subcategoryId, subcategories, getProductsBySubcategory]);
   
   if (!subcategoryId) {
     return (
