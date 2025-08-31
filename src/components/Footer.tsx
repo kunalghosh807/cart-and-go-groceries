@@ -4,9 +4,9 @@ import { Link } from 'react-router-dom';
 
 const Footer = () => {
   return (
-    <footer className="bg-white border-t border-gray-200 pt-10 pb-6">
+    <footer className="bg-gray-50 border-t border-gray-200 pt-10 pb-6">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-8">
           {/* Company Info */}
           <div>
             <h3 className="text-lg font-semibold text-gray-900 mb-4">Busskit</h3>
@@ -73,25 +73,7 @@ const Footer = () => {
             </ul>
           </div>
           
-          {/* Newsletter */}
-          <div>
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Newsletter</h3>
-            <p className="text-gray-600 mb-4">Subscribe to get special offers, free giveaways, and once-in-a-lifetime deals.</p>
-            <form className="flex">
-              <input 
-                type="email" 
-                placeholder="Your email" 
-                className="min-w-0 flex-auto rounded-l-md border border-gray-300 px-3.5 py-2 text-gray-900 shadow-sm focus:border-grocery-primary focus:ring-grocery-primary"
-                required
-              />
-              <button 
-                type="submit" 
-                className="rounded-r-md bg-grocery-primary px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-grocery-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-grocery-primary"
-              >
-                Subscribe
-              </button>
-            </form>
-          </div>
+
         </div>
         
         <div className="mt-8 pt-8 border-t border-gray-200 text-center text-sm text-gray-500">

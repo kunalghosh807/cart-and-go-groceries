@@ -8,6 +8,7 @@ import { CartProvider } from "@/hooks/useCart";
 import { AuthProvider } from "@/contexts/AuthContext";
 import ScrollToTop from "@/components/ScrollToTop";
 import ErrorBoundary from "@/components/ErrorBoundary";
+import MobileFooter from "@/components/MobileFooter";
 import Index from "./pages/Index";
 import Cart from "./pages/Cart";
 import Checkout from "./pages/Checkout";
@@ -51,9 +52,10 @@ const App = () => (
               <Route path="/admin/banners" element={<BannerManagement />} />
               <Route path="/admin/categories" element={<CategoryManagement />} />
               <Route path="/admin/subcategories" element={<SubcategoryManagement />} />
-              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+
               <Route path="*" element={<NotFound />} />
             </Routes>
+            <MobileFooter />
           </BrowserRouter>
           </TooltipProvider>
         </CartProvider>

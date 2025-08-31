@@ -69,7 +69,7 @@ const SubcategoryManagement = () => {
     }
   }, [user, navigate, toast]);
 
-  // Note: Products fetching removed as we now use category_type from database
+
 
   // Get categories that can have subcategories (empty categories or categories with existing subcategories)
   const getCategoriesAvailableForSubcategories = () => {
@@ -81,8 +81,7 @@ const SubcategoryManagement = () => {
       category.category_type === 'subcategory_category'
     );
     
-    console.log('All categories:', categories.map(c => ({ name: c.name, type: c.category_type })));
-    console.log('Filtered categories (available for subcategories):', filteredCategories.map(c => ({ name: c.name, type: c.category_type })));
+
     
     return filteredCategories;
   };

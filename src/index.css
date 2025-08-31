@@ -70,3 +70,37 @@
   transform: translateY(-4px);
   box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
 }
+
+/* Reset video element spacing */
+video {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  vertical-align: top;
+  display: block;
+}
+
+/* Ensure carousel containers have no extra spacing and full height */
+.carousel-container {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+}
+
+/* Reset any default spacing on carousel elements and ensure full height */
+[data-carousel-content] {
+  margin: 0 !important;
+  padding: 0 !important;
+  height: 100% !important;
+}
+
+[data-carousel-item] {
+  margin: 0 !important;
+  padding: 0 !important;
+  height: 100% !important;
+}
+
+/* Force carousel viewport to take full height */
+.carousel-viewport {
+  height: 100% !important;
+}

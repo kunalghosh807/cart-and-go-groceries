@@ -273,47 +273,47 @@ const Checkout = () => {
   return (
     <div className="flex flex-col min-h-screen">
       <Navbar />
-      <main className="flex-grow">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-12">
-          <div className="flex items-center mb-8">
+      <main className="flex-grow pb-20 md:pb-0">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 md:pt-8 pb-12">
+          <div className="flex items-center mb-6 md:mb-8">
             <Button 
               variant="ghost" 
               onClick={currentStep === 'address' ? () => navigate('/cart') : handleBackToAddress}
-              className="mr-4"
+              className="mr-2 md:mr-4 p-2 -ml-2 rounded-lg hover:bg-gray-100"
             >
               <ArrowLeft className="h-4 w-4 mr-2" />
               {currentStep === 'address' ? 'Back to Cart' : 'Back to Address'}
             </Button>
-            <h1 className="text-3xl font-bold">Checkout</h1>
+            <h1 className="text-2xl md:text-3xl font-bold">Checkout</h1>
           </div>
 
           {/* Step Indicator */}
-          <div className="flex items-center justify-center mb-8">
-            <div className="flex items-center space-x-4">
-              <div className={`flex items-center space-x-2 ${
+          <div className="flex items-center justify-center mb-6 md:mb-8">
+            <div className="flex items-center space-x-2 md:space-x-4">
+              <div className={`flex items-center space-x-1 md:space-x-2 ${
                 currentStep === 'address' ? 'text-blue-600' : 'text-green-600'
               }`}>
                 {currentStep === 'payment' ? (
-                  <CheckCircle className="h-6 w-6" />
+                  <CheckCircle className="h-5 w-5 md:h-6 md:w-6" />
                 ) : (
-                  <MapPin className="h-6 w-6" />
+                  <MapPin className="h-5 w-5 md:h-6 md:w-6" />
                 )}
-                <span className="font-medium">Delivery Address</span>
+                <span className="font-medium text-sm md:text-base">Delivery Address</span>
               </div>
-              <div className={`w-12 h-0.5 ${
+              <div className={`w-8 md:w-12 h-0.5 ${
                 currentStep === 'payment' ? 'bg-green-600' : 'bg-gray-300'
               }`} />
-              <div className={`flex items-center space-x-2 ${
+              <div className={`flex items-center space-x-1 md:space-x-2 ${
                 currentStep === 'payment' ? 'text-blue-600' : 'text-gray-400'
               }`}>
-                <CreditCard className="h-6 w-6" />
-                <span className="font-medium">Payment</span>
+                <CreditCard className="h-5 w-5 md:h-6 md:w-6" />
+                <span className="font-medium text-sm md:text-base">Payment</span>
               </div>
             </div>
           </div>
 
           {currentStep === 'address' ? (
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8">
               {/* Address Selection */}
               <div className="lg:col-span-2">
                 <AddressSelection
@@ -324,29 +324,29 @@ const Checkout = () => {
               </div>
             </div>
           ) : (
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8">
               {/* Order Summary */}
               <div>
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Order Summary</CardTitle>
+                <Card className="shadow-sm">
+                  <CardHeader className="pb-4">
+                    <CardTitle className="text-lg md:text-xl">Order Summary</CardTitle>
                   </CardHeader>
-                  <CardContent>
+                  <CardContent className="pt-0">
                     <div className="space-y-4">
                       {cartItems.map((item) => (
                         <div key={item.id} className="flex justify-between items-center">
-                          <div className="flex items-center space-x-3">
+                          <div className="flex items-center space-x-2 md:space-x-3">
                             <img
                               src={item.image}
                               alt={item.name}
-                              className="w-12 h-12 object-cover rounded-md"
+                              className="w-10 h-10 md:w-12 md:h-12 object-cover rounded-md"
                             />
                             <div>
-                              <p className="font-medium">{item.name}</p>
-                              <p className="text-sm text-gray-600">Qty: {item.quantity}</p>
+                              <p className="font-medium text-sm md:text-base">{item.name}</p>
+                              <p className="text-xs md:text-sm text-gray-600">Qty: {item.quantity}</p>
                             </div>
                           </div>
-                          <span className="font-medium">
+                          <span className="font-medium text-sm md:text-base">
                             ₹{(item.price * item.quantity).toFixed(2)}
                           </span>
                         </div>
@@ -371,14 +371,14 @@ const Checkout = () => {
 
                 {/* Selected Address */}
                 {selectedAddress && (
-                  <Card className="mt-6">
-                    <CardHeader>
-                      <CardTitle>Delivery Address</CardTitle>
+                  <Card className="mt-6 shadow-sm">
+                    <CardHeader className="pb-4">
+                      <CardTitle className="text-lg md:text-xl">Delivery Address</CardTitle>
                     </CardHeader>
-                    <CardContent>
+                    <CardContent className="pt-0">
                       <div className="space-y-2">
-                        <p className="font-medium">{selectedAddress.name}</p>
-                        <p className="text-gray-600">
+                        <p className="font-medium text-sm md:text-base">{selectedAddress.name}</p>
+                        <p className="text-gray-600 text-sm md:text-base break-words">
                           {selectedAddress.street}, {selectedAddress.city}, {selectedAddress.state} {selectedAddress.zip}
                         </p>
                       </div>
@@ -389,24 +389,24 @@ const Checkout = () => {
 
               {/* Payment Form */}
               <div>
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Payment Details</CardTitle>
+                <Card className="shadow-sm">
+                  <CardHeader className="pb-4">
+                    <CardTitle className="text-lg md:text-xl">Payment Details</CardTitle>
                   </CardHeader>
-                  <CardContent className="space-y-6">
+                  <CardContent className="space-y-6 pt-0">
                     <div className="text-center">
                       <h3 className="text-lg font-semibold mb-4">Choose Payment Method</h3>
-                      <div className="grid grid-cols-2 gap-4 mb-6">
-                        <div className="flex items-center justify-center p-4 border rounded-lg bg-blue-50">
-                          <Smartphone className="h-6 w-6 mr-2 text-blue-600" />
-                          <span className="font-medium">UPI</span>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+                        <div className="flex items-center justify-center p-3 md:p-4 border rounded-lg bg-blue-50">
+                          <Smartphone className="h-5 w-5 md:h-6 md:w-6 mr-2 text-blue-600" />
+                          <span className="font-medium text-sm md:text-base">UPI</span>
                         </div>
-                        <div className="flex items-center justify-center p-4 border rounded-lg bg-green-50">
-                          <CreditCard className="h-6 w-6 mr-2 text-green-600" />
-                          <span className="font-medium">Cards</span>
+                        <div className="flex items-center justify-center p-3 md:p-4 border rounded-lg bg-green-50">
+                          <CreditCard className="h-5 w-5 md:h-6 md:w-6 mr-2 text-green-600" />
+                          <span className="font-medium text-sm md:text-base">Cards</span>
                         </div>
                       </div>
-                      <p className="text-sm text-muted-foreground mb-6">
+                      <p className="text-xs md:text-sm text-muted-foreground mb-6 text-center">
                         Secure payment with UPI, Debit Cards, Credit Cards & Net Banking
                       </p>
                       <Button 

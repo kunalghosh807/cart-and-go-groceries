@@ -95,7 +95,7 @@ const Index = () => {
     <div className="flex flex-col min-h-screen">
       <Navbar />
       <main className="flex-grow">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 pb-12">
           {/* Hero Section */}
           <HeroSection />
           
@@ -113,7 +113,7 @@ const Index = () => {
                 );
                 
                 return (
-                  <section key={`category-${section.dbCategory.id}`} className="mb-12">
+                  <section key={`category-${section.dbCategory.id}`} className="mb-8">
                     <div className="flex items-center justify-between mb-6">
                       <h2 className="text-xl font-bold">{section.name}</h2>
                       <Button variant="link" className="text-grocery-primary">
@@ -152,7 +152,7 @@ const Index = () => {
                 );
                 
                 return (
-                  <section key={`custom-${section.dbCategory.id}`} className="mb-12">
+                  <section key={`custom-${section.dbCategory.id}`} className="mb-8">
                     <div className="flex items-center justify-between mb-6">
                       <h2 className="text-xl font-bold">{section.name}</h2>
                       <Button variant="link" className="text-grocery-primary">
@@ -201,38 +201,7 @@ const Index = () => {
             })
           )}
           
-          {/* Features Section */}
-          <section className="mb-12">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="flex flex-col items-center text-center p-6 bg-grocery-light rounded-lg">
-                <div className="w-16 h-16 flex items-center justify-center bg-grocery-primary/10 text-grocery-primary rounded-full mb-4">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
-                  </svg>
-                </div>
-                <h3 className="text-xl font-semibold mb-2">Fresh Quality</h3>
-                <p className="text-gray-600">We source the freshest produce and ingredients for your family.</p>
-              </div>
-              <div className="flex flex-col items-center text-center p-6 bg-grocery-light rounded-lg">
-                <div className="w-16 h-16 flex items-center justify-center bg-grocery-primary/10 text-grocery-primary rounded-full mb-4">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                </div>
-                <h3 className="text-xl font-semibold mb-2">Fast Delivery</h3>
-                <p className="text-gray-600">Order before noon for same-day delivery to your doorstep.</p>
-              </div>
-              <div className="flex flex-col items-center text-center p-6 bg-grocery-light rounded-lg">
-                <div className="w-16 h-16 flex items-center justify-center bg-grocery-primary/10 text-grocery-primary rounded-full mb-4">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                  </svg>
-                </div>
-                <h3 className="text-xl font-semibold mb-2">Secure Checkout</h3>
-                <p className="text-gray-600">Your payment details are always protected with our secure checkout.</p>
-              </div>
-            </div>
-          </section>
+
         </div>
       </main>
       <Footer />
