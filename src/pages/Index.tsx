@@ -4,6 +4,7 @@ import Navbar from '@/components/Navbar';
 import HeroSection from '@/components/HeroSection';
 import ProductCard from '@/components/ProductCard';
 import CategoryCard from '@/components/CategoryCard';
+import SubcategoryCard from '@/components/SubcategoryCard';
 import Footer from '@/components/Footer';
 import { Button } from '@/components/ui/button';
 import { ChevronRight } from 'lucide-react';
@@ -120,16 +121,17 @@ const Index = () => {
                         View All <ChevronRight className="h-4 w-4 ml-1" />
                       </Button>
                     </div>
-                    <div className="grid grid-cols-4 gap-3">
+                    <div className="grid grid-cols-4 gap-1 sm:gap-2">
                       {subcategoriesLoading ? (
                         <div className="col-span-4 text-center py-4 text-muted-foreground">
                           Loading subcategories...
                         </div>
                       ) : categorySubcategories.length > 0 ? (
                         categorySubcategories.slice(0, 8).map((subcat) => (
-                          <CategoryCard 
+                          <SubcategoryCard 
                             key={subcat.id}
                             id={subcat.id}
+                            categoryId={section.dbCategory.id}
                             name={subcat.name} 
                             image={subcat.image || '/placeholder.svg'} 
                             productCount={0} 
@@ -159,16 +161,17 @@ const Index = () => {
                         View All <ChevronRight className="h-4 w-4 ml-1" />
                       </Button>
                     </div>
-                    <div className="grid grid-cols-4 gap-3">
+                    <div className="grid grid-cols-4 gap-1 sm:gap-2">
                       {subcategoriesLoading ? (
                         <div className="col-span-4 text-center py-4 text-muted-foreground">
                           Loading subcategories...
                         </div>
                       ) : categorySubcategories.length > 0 ? (
                         categorySubcategories.slice(0, 8).map((subcat) => (
-                          <CategoryCard 
+                          <SubcategoryCard 
                             key={subcat.id}
                             id={subcat.id}
+                            categoryId={section.dbCategory.id}
                             name={subcat.name} 
                             image={subcat.image || '/placeholder.svg'} 
                             productCount={0} 

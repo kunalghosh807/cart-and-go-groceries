@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Product } from '@/hooks/useCart';
 
@@ -37,7 +37,7 @@ export const useProducts = () => {
     loadProducts();
   }, []);
 
-  const getProductsByCategory = async (categoryId: string) => {
+  const getProductsByCategory = useCallback(async (categoryId: string) => {
     try {
       const { data, error } = await supabase
         .from('products')
@@ -50,24 +50,27 @@ export const useProducts = () => {
       console.error('Error fetching products by category:', error);
       return [];
     }
-  };
+  }, []);
 
-  const getProductsBySubcategory = async (subcategoryId: string) => {
+  const getProductsBySubcategory = useCallback(async (subcategoryId: string) => {
     try {
+      console.log('🔍 Fetching products for subcategory ID:', subcategoryId);
       const { data, error } = await supabase
         .from('products')
         .select('*')
         .eq('subcategory_id', subcategoryId);
       
       if (error) throw error;
+      console.log('📦 Found products for subcategory:', data?.length || 0, 'products');
+      console.log('📦 Products data:', data);
       return data || [];
     } catch (error) {
       console.error('Error fetching products by subcategory:', error);
       return [];
     }
-  };
+  }, []);
 
-  const searchProducts = (query: string) => {
+  const searchProducts = useCallback((query: string) => {
     const searchTerm = query.toLowerCase();
     return products.filter(p => 
       p.name.toLowerCase().includes(searchTerm) ||
@@ -75,7 +78,7 @@ export const useProducts = () => {
       p.subcategory?.toLowerCase().includes(searchTerm) ||
       p.description?.toLowerCase().includes(searchTerm)
     );
-  };
+  }, [products]);
 
   return {
     products,

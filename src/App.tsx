@@ -13,9 +13,14 @@ import Index from "./pages/Index";
 import Cart from "./pages/Cart";
 import Checkout from "./pages/Checkout";
 import Profile from "./pages/Profile";
+import Orders from "./pages/Orders";
+import OrderDetails from "./pages/OrderDetails";
+import Wishlist from "./pages/Wishlist";
+import SavedAddresses from "./pages/SavedAddresses";
 import Categories from "./pages/Categories";
 import CategoryProducts from "./pages/CategoryProducts";
 import SubcategoryProducts from "./pages/SubcategoryProducts";
+import ProductDetail from "./pages/ProductDetail";
 
 import Auth from "./pages/Auth";
 import Search from "./pages/Search";
@@ -42,9 +47,14 @@ const App = () => (
               <Route path="/cart" element={<Cart />} />
               <Route path="/checkout" element={<Checkout />} />
               <Route path="/profile" element={<Profile />} />
+              <Route path="/orders" element={<Orders />} />
+              <Route path="/orders/:orderId" element={<OrderDetails />} />
+              <Route path="/wishlist" element={<Wishlist />} />
+              <Route path="/saved-addresses" element={<SavedAddresses />} />
               <Route path="/categories" element={<Categories />} />
               <Route path="/categories/:categoryId" element={<CategoryProducts />} />
               <Route path="/categories/:categoryId/:subcategoryId" element={<SubcategoryProducts />} />
+              <Route path="/product/:id" element={<ProductDetail />} />
               <Route path="/search" element={<Search />} />
 
               <Route path="/auth" element={<Auth />} />

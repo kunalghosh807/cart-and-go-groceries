@@ -23,7 +23,8 @@ import {
   DollarSign,
   ArrowUpDown,
   Filter,
-  MoreHorizontal
+  MoreHorizontal,
+  ArrowLeft
 } from 'lucide-react';
 import { 
   Dialog, 
@@ -529,12 +530,49 @@ const Admin = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    // Find category_id from category name
+    const selectedCategory = dbCategories.find(cat => cat.name === formData.category);
+    if (!selectedCategory) {
+      toast({
+        title: "Error",
+        description: "Please select a valid category",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    // Find subcategory_id from subcategory name if subcategory is selected
+    let subcategoryId = null;
+    if (formData.subcategory) {
+      console.log('Looking for subcategory:', formData.subcategory);
+      console.log('In category:', selectedCategory.name, selectedCategory.id);
+      console.log('Available subcategories:', dbSubcategories.filter(sub => sub.category_id === selectedCategory.id));
+      
+      const selectedSubcategory = dbSubcategories.find(
+        sub => sub.name === formData.subcategory && sub.category_id === selectedCategory.id
+      );
+      
+      if (selectedSubcategory) {
+        subcategoryId = selectedSubcategory.id;
+        console.log('Found subcategory ID:', subcategoryId);
+      } else {
+        console.log('Subcategory not found!');
+        toast({
+          title: "Warning",
+          description: `Subcategory "${formData.subcategory}" not found for category "${selectedCategory.name}". Product will be added without subcategory.`,
+          variant: "destructive",
+        });
+      }
+    }
+    
     const productData = {
       name: formData.name,
       price: parseFloat(formData.price),
       image: formData.image,
-      category: formData.category,
-      subcategory: formData.subcategory || null,
+      category: formData.category, // Keep for backward compatibility
+      category_id: selectedCategory.id, // Add the required foreign key
+      subcategory: formData.subcategory || null, // Keep for backward compatibility
+      subcategory_id: subcategoryId, // Add the foreign key
       description: formData.description || null,
       stock_quantity: parseInt(formData.stock_quantity),
       deal_price: formData.deal_price ? parseFloat(formData.deal_price) : null
@@ -727,6 +765,18 @@ const Admin = () => {
     <div className="min-h-screen bg-background">
       <Navbar />
       <div className="container mx-auto px-4 py-8">
+        <div className="flex items-center gap-4 mb-6">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => navigate('/')}
+            className="flex items-center gap-2"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Back to Home
+          </Button>
+        </div>
+
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-3xl font-bold">Product Management</h1>
           <div className="flex gap-3">

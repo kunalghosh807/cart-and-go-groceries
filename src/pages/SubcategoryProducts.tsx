@@ -13,7 +13,7 @@ const SubcategoryProducts = () => {
   const { categoryId, subcategoryId } = useParams();
   const navigate = useNavigate();
   const { getProductsBySubcategory } = useProducts();
-  const { subcategories } = useSubcategories();
+  const { subcategories, loading: subcategoriesLoading } = useSubcategories();
   const [subcategoryName, setSubcategoryName] = useState<string>('');
   const [categoryName, setCategoryName] = useState<string>('');
   const [products, setProducts] = useState<any[]>([]);
@@ -26,34 +26,50 @@ const SubcategoryProducts = () => {
         return;
       }
 
+      // Wait for subcategories to load before proceeding
+      if (subcategoriesLoading) {
+        console.log('⏳ Waiting for subcategories to load...');
+        return;
+      }
+
       setLoading(true);
       
       // Find the subcategory by ID in our subcategories list
+      console.log('🔍 Looking for subcategory with ID:', subcategoryId);
+      console.log('🔍 Available subcategories:', subcategories.map(s => ({ id: s.id, name: s.name })));
       const subcategory = subcategories.find(sub => sub.id === subcategoryId);
       
       if (subcategory) {
+        console.log('✅ Found subcategory:', subcategory.name, 'ID:', subcategory.id);
         setSubcategoryName(subcategory.name);
         setCategoryName(subcategory.categories?.name || '');
         
         // Use the new getProductsBySubcategory function with subcategory_id
         const subcategoryProducts = await getProductsBySubcategory(subcategory.id);
+        console.log('📦 Loaded products for subcategory:', subcategoryProducts.length);
+        console.log('📦 Products data:', subcategoryProducts);
         setProducts(subcategoryProducts);
       } else {
+        console.log('❌ Subcategory not found by ID, trying fallback method');
         // Fallback: try to find subcategory by converting slug to name
         const convertedName = subcategoryId.split('-').map(word => 
           word.charAt(0).toUpperCase() + word.slice(1)
         ).join(' ');
         
+        console.log('🔄 Trying to find subcategory by name:', convertedName);
         const foundSubcategory = subcategories.find(sub => 
           sub.name.toLowerCase() === convertedName.toLowerCase()
         );
         
         if (foundSubcategory) {
+          console.log('✅ Found subcategory by name:', foundSubcategory.name, 'ID:', foundSubcategory.id);
           setSubcategoryName(foundSubcategory.name);
           setCategoryName(foundSubcategory.categories?.name || '');
           const subcategoryProducts = await getProductsBySubcategory(foundSubcategory.id);
+          console.log('📦 Loaded products for subcategory:', subcategoryProducts.length);
           setProducts(subcategoryProducts);
         } else {
+          console.log('❌ Subcategory not found by name either');
           setSubcategoryName(convertedName);
           setProducts([]);
         }
@@ -63,7 +79,7 @@ const SubcategoryProducts = () => {
     };
 
     loadSubcategoryAndProducts();
-  }, [subcategoryId, subcategories, getProductsBySubcategory]);
+  }, [subcategoryId, subcategories, subcategoriesLoading, getProductsBySubcategory]);
   
   if (!subcategoryId) {
     return (

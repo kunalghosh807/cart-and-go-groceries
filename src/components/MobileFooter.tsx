@@ -1,12 +1,12 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Home, ShoppingBag, Grid3X3, ShoppingCart } from 'lucide-react';
+import { Home, ShoppingBag, Grid3X3, ShoppingCart, User } from 'lucide-react';
 import { useCart } from '@/hooks/useCart';
 
 const MobileFooter = () => {
   const location = useLocation();
-  const { items } = useCart();
-  const cartItemCount = items ? items.reduce((sum, item) => sum + item.quantity, 0) : 0;
+  const { cartItems, getItemsCount } = useCart();
+  const cartItemCount = getItemsCount();
 
   const navItems = [
     {
@@ -15,9 +15,14 @@ const MobileFooter = () => {
       path: '/',
     },
     {
-      name: 'Order Again',
+      name: 'Buy Again',
       icon: ShoppingBag,
       path: '/orders',
+    },
+    {
+      name: 'You',
+      icon: User,
+      path: '/profile',
     },
     {
       name: 'Categories',
@@ -33,8 +38,8 @@ const MobileFooter = () => {
   ];
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-4 py-2 md:hidden z-50">
-      <div className="flex justify-around items-center">
+    <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-1.5 py-1 md:hidden z-50">
+      <div className="flex justify-evenly items-center">
         {navItems.map((item) => {
           const Icon = item.icon;
           const isActive = location.pathname === item.path;
@@ -43,19 +48,21 @@ const MobileFooter = () => {
             <Link
               key={item.name}
               to={item.path}
-              className={`flex flex-col items-center justify-center py-1 px-2 relative ${
+              className={`flex flex-col items-center justify-center py-0.5 px-0.5 relative min-w-0 flex-1 ${
                 isActive ? 'text-grocery-primary' : 'text-gray-500'
               }`}
             >
-              <div className="relative">
-                <Icon className="h-5 w-5 mb-1" />
+              <div className="relative flex items-center justify-center">
+                <Icon className="h-3.5 w-3.5" />
                 {item.badge && (
-                  <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">
+                  <span className="absolute -top-1.5 -right-1.5 bg-red-500 text-white text-[10px] rounded-full h-3 w-3 flex items-center justify-center">
                     {item.badge}
                   </span>
                 )}
               </div>
-              <span className="text-xs font-medium">{item.name}</span>
+              <span className="text-[10px] font-normal mt-0.5 text-center leading-tight">
+                {item.name}
+              </span>
             </Link>
           );
         })}

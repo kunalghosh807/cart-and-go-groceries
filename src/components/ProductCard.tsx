@@ -1,80 +1,97 @@
 
 import React from 'react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardFooter } from '@/components/ui/card';
-import { ShoppingCart, Plus, Minus } from 'lucide-react';
-import { useCart, Product } from '@/hooks/useCart';
+import { useNavigate } from 'react-router-dom';
+import { Product } from '@/hooks/useCart';
+import { Plus, Star } from 'lucide-react';
 
 interface ProductCardProps {
   product: Product;
 }
 
 const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
-  const { addToCart, cartItems, updateQuantity } = useCart();
+  const navigate = useNavigate();
   
-  // Find if this product is already in cart
-  const cartItem = cartItems.find(item => item.id === product.id);
-  const quantityInCart = cartItem ? cartItem.quantity : 0;
+  const handleClick = () => {
+    navigate(`/product/${product.id}`);
+  };
+
+  const handleAddClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    // Add to cart functionality can be implemented here
+  };
+
+  // Calculate discount percentage
+  const discountPercentage = product.deal_price && product.deal_price < product.price 
+    ? Math.round(((product.price - product.deal_price) / product.price) * 100)
+    : 0;
 
   return (
-    <Card className="overflow-hidden transition-all duration-200 hover:shadow-md hover:-translate-y-1 h-full flex flex-col w-40 max-w-40">
-      <div className="relative pt-[65%]">
-        <img
-          src={product.image}
-          alt={product.name}
-          className={`absolute top-0 left-0 w-full h-full object-cover ${
-            product.stock_quantity === 0 ? 'filter grayscale' : ''
-          }`}
-        />
+    <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-3 w-full max-w-[160px] relative">
+      {/* Product Image */}
+      <div 
+        className="cursor-pointer mb-2"
+        onClick={handleClick}
+      >
+        <div className="aspect-square w-full bg-gray-50 rounded-lg overflow-hidden relative">
+          <img
+            src={product.image}
+            alt={product.name}
+            className="w-full h-full object-cover"
+          />
+          {/* Add Button */}
+          <button
+            onClick={handleAddClick}
+            className="absolute top-2 right-2 w-6 h-6 bg-white rounded border border-orange-400 flex items-center justify-center shadow-sm hover:bg-orange-50 transition-colors"
+          >
+            <Plus className="w-3 h-3 text-orange-500" />
+          </button>
+        </div>
       </div>
-      <CardContent className="p-3 flex-grow">
-        <p className="text-xs text-muted-foreground mb-1">{product.category}</p>
-        <h3 className="font-medium text-sm mb-1 line-clamp-2">{product.name}</h3>
-        <p className="text-base font-bold text-grocery-primary">
-          ₹{product.price.toFixed(2)}
-        </p>
-      </CardContent>
-      <CardFooter className="p-3 pt-0">
-        {product.stock_quantity === 0 ? (
-          <Button 
-            size="sm"
-            className="w-full bg-gray-400 text-white cursor-not-allowed"
-            disabled
-          >
-            Out of Stock
-          </Button>
-        ) : quantityInCart === 0 ? (
-          <Button 
-            size="sm"
-            className="w-full bg-grocery-primary hover:bg-grocery-dark text-white"
-            onClick={() => addToCart(product)}
-          >
-            <ShoppingCart className="h-3 w-3 mr-1" />
-            Add to Cart
-          </Button>
+
+      {/* Rating */}
+      <div className="flex items-center gap-1 mb-1">
+        <span className="text-sm font-medium text-gray-800">4.4</span>
+        <Star className="w-3 h-3 fill-green-500 text-green-500" />
+      </div>
+
+      {/* Product Size/Weight */}
+      <div className="text-xs text-gray-500 mb-2">
+        5 kg
+      </div>
+
+      {/* Product Name */}
+      <h3 
+        className="text-sm font-medium text-gray-800 mb-2 line-clamp-2 cursor-pointer"
+        onClick={handleClick}
+      >
+        {product.name}
+      </h3>
+
+      {/* Discount Badge */}
+      {discountPercentage > 0 && (
+        <div className="text-xs font-semibold text-green-600 mb-2">
+          {discountPercentage}% OFF
+        </div>
+      )}
+
+      {/* Price Section */}
+      <div className="flex items-center gap-2">
+        {product.deal_price && product.deal_price < product.price ? (
+          <>
+            <div className="bg-yellow-400 px-2 py-1 rounded text-sm font-bold text-black">
+              ₹{product.deal_price.toFixed(0)}
+            </div>
+            <span className="text-xs text-gray-400 line-through">
+              ₹{product.price.toFixed(0)}
+            </span>
+          </>
         ) : (
-          <div className="flex items-center justify-between w-full">
-            <Button
-              size="sm"
-              variant="outline"
-              className="h-8 w-8 p-0"
-              onClick={() => updateQuantity(product.id, quantityInCart - 1)}
-            >
-              <Minus className="h-3 w-3" />
-            </Button>
-            <span className="font-medium text-sm px-2">{quantityInCart}</span>
-            <Button
-              size="sm"
-              variant="outline"
-              className="h-8 w-8 p-0"
-              onClick={() => updateQuantity(product.id, quantityInCart + 1)}
-            >
-              <Plus className="h-3 w-3" />
-            </Button>
+          <div className="bg-yellow-400 px-2 py-1 rounded text-sm font-bold text-black">
+            ₹{product.price.toFixed(0)}
           </div>
         )}
-      </CardFooter>
-    </Card>
+      </div>
+    </div>
   );
 };
 
