@@ -80,6 +80,8 @@ interface Product {
   description: string | null;
   stock_quantity: number;
   deal_price: number | null;
+  weight: number | null;
+  unit: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -116,7 +118,9 @@ const Admin = () => {
     subcategory: '',
     description: '',
     stock_quantity: '',
-    deal_price: ''
+    deal_price: '',
+    weight: '',
+    unit: 'g'
   });
 
   const [priceUpdateData, setPriceUpdateData] = useState({
@@ -295,7 +299,9 @@ const Admin = () => {
       subcategory: '',
       description: '',
       stock_quantity: '',
-      deal_price: ''
+      deal_price: '',
+      weight: '',
+      unit: 'g'
     });
     setEditingProduct(null);
   };
@@ -503,7 +509,9 @@ const Admin = () => {
       subcategory: product.subcategory || '',
       description: product.description || '',
       stock_quantity: product.stock_quantity.toString(),
-      deal_price: product.deal_price?.toString() || ''
+      deal_price: product.deal_price?.toString() || '',
+      weight: product.weight?.toString() || '',
+      unit: product.unit || 'g'
     });
     setEditingProduct(product);
     setIsEditModalOpen(true);
@@ -575,7 +583,9 @@ const Admin = () => {
       subcategory_id: subcategoryId, // Add the foreign key
       description: formData.description || null,
       stock_quantity: parseInt(formData.stock_quantity),
-      deal_price: formData.deal_price ? parseFloat(formData.deal_price) : null
+      deal_price: formData.deal_price ? parseFloat(formData.deal_price) : null,
+      weight: formData.weight ? parseFloat(formData.weight) : null,
+      unit: formData.unit || null
     };
 
     let error;
@@ -1172,6 +1182,35 @@ const Admin = () => {
                     onChange={(e) => setFormData({ ...formData, deal_price: e.target.value })}
                     placeholder="Enter deal price"
                   />
+                </div>
+                
+                <div>
+                  <Label htmlFor="weight">Weight</Label>
+                  <Input
+                    id="weight"
+                    type="number"
+                    step="0.01"
+                    value={formData.weight}
+                    onChange={(e) => setFormData({ ...formData, weight: e.target.value })}
+                    placeholder="Enter weight"
+                  />
+                </div>
+                
+                <div>
+                  <Label htmlFor="unit">Unit</Label>
+                  <Select value={formData.unit} onValueChange={(value) => setFormData({ ...formData, unit: value })}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select unit" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="g">g (grams)</SelectItem>
+                      <SelectItem value="kg">kg (kilograms)</SelectItem>
+                      <SelectItem value="ml">ml (milliliters)</SelectItem>
+                      <SelectItem value="l">l (liters)</SelectItem>
+                      <SelectItem value="pcs">pcs (pieces)</SelectItem>
+                      <SelectItem value="pack">pack</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
                 
                 <div className="md:col-span-2">

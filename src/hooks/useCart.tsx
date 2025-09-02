@@ -12,6 +12,8 @@ export interface Product {
   description: string;
   stock_quantity: number;
   deal_price?: number;
+  weight?: number | null;
+  unit?: string | null;
   quantity: number;
 }
 

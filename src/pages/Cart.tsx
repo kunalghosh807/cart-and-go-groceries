@@ -4,7 +4,7 @@ import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Trash2, Plus, Minus, ShoppingBag } from 'lucide-react';
+import { Trash2, Plus, Minus, ShoppingBag, ArrowLeft } from 'lucide-react';
 import { useCart } from '@/hooks/useCart';
 
 const Cart = () => {
@@ -39,7 +39,18 @@ const Cart = () => {
       <main className="flex-grow">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-12">
           <div className="flex items-center justify-between mb-8">
-            <h1 className="text-3xl font-bold">Shopping Cart</h1>
+            <div className="flex items-center gap-4">
+              <Link to="/">
+                <Button 
+                  variant="ghost" 
+                  className="flex items-center gap-2 text-grocery-primary hover:bg-grocery-primary/10"
+                >
+                  <ArrowLeft className="h-4 w-4" />
+                  Back to Home
+                </Button>
+              </Link>
+              <h1 className="text-3xl font-bold">Shopping Cart</h1>
+            </div>
             <Button 
               variant="outline" 
               onClick={clearCart}
